@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Data visualization</title>
+        <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+        <script src="./d3.v4.min.js"></script>
+    </head>
+    <body>
+        <svg id="viz">
+        </svg>
+    </body>
+
+    <script>
+
+        function isEven(n) {
+            return !(n & 1);
+        }
+
+        /**
+         * @return Array of "step" values
+         */
+        function computeCollatz(n) {
+            if (n < 1) {
+                return [];
+            }
+
+            if (n == 1) {
+                return [1];
+            }
+            
+            let n_next;
+            if (isEven(n)) {
+                n_next = n / 2;
+            }
+            else {
+                n_next = 3 * n + 1;
+            }
+
+            return [n].concat(computeCollatz(n_next));
+        }
+
+        // function () {
+            var computed = [...Array(5).keys()].map(i => computeCollatz(i));
+            console.dir(computed);
+            
+            let stack = d3.stack(computed);
+            d3.plot(stack);
+        // }
+    </script>
+</html>
