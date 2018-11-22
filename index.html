@@ -42,12 +42,33 @@
             return [n].concat(computeCollatz(n_next));
         }
 
-        // function () {
-            var computed = [...Array(5).keys()].map(i => computeCollatz(i));
-            console.dir(computed);
-            
-            let stack = d3.stack(computed);
-            d3.plot(stack);
-        // }
+        var svgContainer = d3.select("body").append("svg")
+            .attr("width", 2000)
+            .attr("height", 2000);
+ 
+
+        var computed = [...Array(100).keys()].map(i => computeCollatz(i));
+        console.dir(computed);
+
+        //Draw the squares
+        computed.forEach(function(v, i){
+            let dp = 0;
+            v.forEach(function(d, j) {
+                svgContainer.append("rect")
+                    .attr("x", i*5)
+                    .attr("y", j*5)
+                    .attr("width", 5)
+                    .attr("height", 5)
+                    .attr("fill", (d - dp)>0?"red":"green");
+                    dp = d;
+            });
+        });
+        // var rectangle = svgContainer.append("rect")
+        //     .attr("x", 10)
+        //     .attr("y", 10)
+        //     .attr("width", 50)
+        //     .attr("height", 100);
+
+
     </script>
 </html>
