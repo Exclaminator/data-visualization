@@ -14,6 +14,7 @@
     </head>
     <body>
         <svg id="visje"></svg>
+        <svg id="blokje"></svg>
     </body>
 
     <script>
@@ -32,7 +33,8 @@
         
         function transform(node) {
             return {
-                name: node.value, children: node.next.map(transform)
+                name: node.value,
+                children: node.next.map(transform)
             };
         }
 
@@ -54,7 +56,7 @@
 
         }
         
-        data = transform(mapping.get("1" ));
+        data = transform(mapping.get(1));
 
         console.dir(data);
 
@@ -181,11 +183,50 @@
                 d.x0 = d.x;
                 d.y0 = d.y;
             });
+            
+            barChart(root);
         }
 
         update(root);
 
         svg.node();
+        
+        ///////
+        // Bar chart
+        ///////
+
+        function barChart(root) {
+            const squareSize = 10;
+            let collatzNumbersToPlot = [];
+            
+            let rootValue = mapping.get(Number(root.data.name));
+            collatzNumbersToPlot.push(rootValue);
+
+            for (let i = 1; i < 50; i++) {
+                collatzNumbersToPlot.push(addCollatz(rootValue.value + i))
+            }
+            
+            d3.select("#blokje").remove();
+            var svgContainer = d3.select("body").append("svg")
+                .attr("id", "blokje")
+                .attr("width", width)
+                .attr("height", height);
+
+            collatzNumbersToPlot.forEach(function(d, i) {
+                let dp = d.value;
+                let j = 0;
+                d.traverseDown(function(d) {
+                    svgContainer.append("rect")
+                        .attr("x", i*squareSize)
+                        .attr("y", height - (j*squareSize))
+                        .attr("width", squareSize)
+                        .attr("height", squareSize)
+                        .attr("fill", (d - dp) > 0 ? "green" : "red");
+                    dp = d.value;
+                    j++;
+                });
+            });
+        }
     </script>
 
 </html>
