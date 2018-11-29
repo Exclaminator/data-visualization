@@ -40,18 +40,18 @@
             if (!depth) {
                 depth = 0;
             }
-
-            console.log(d);
+            
             d.depth = depth;
-            if (d._children) {
-                d._children.forEach(c => resetDepth(c, depth + 1));
-            }
-
+            
             if (d.depth >= maxDepth) {
                 d.children = null;
             } else {
-                d.children = d._children;
+                d.children = d._children;  
+                if (d._children) {
+                    d._children.forEach(c => resetDepth(c, depth + 1));
+                }
             }
+
         }
         
         data = transform(mapping.get("1" ));
