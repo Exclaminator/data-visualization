@@ -17,6 +17,8 @@
     </body>
 
     <script>
+        const maxDepth = 15; 
+
         const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
         const margin = ({top: 10, right: 120, bottom: 10, left: 40});
 
@@ -41,8 +43,15 @@
 
             console.log(d);
             d.depth = depth;
-            if (d._children )
+            if (d._children) {
                 d._children.forEach(c => resetDepth(c, depth + 1));
+            }
+
+            if (d.depth >= maxDepth) {
+                d.children = null;
+            } else {
+                d.children = d._children;
+            }
         }
         
         data = transform(mapping.get("1" ));
@@ -56,7 +65,7 @@
         root.descendants().forEach((d, i) => {
             d.id = i;
             d._children = d.children;
-            //if (d.depth && d.data.name.length !== 7) d.children = null;
+            if (d.depth >= maxDepth) d.children = null;
         });
 
         const svg = d3.select("#visje")
