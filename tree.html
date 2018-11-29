@@ -40,8 +40,7 @@
             if (!depth) {
                 depth = 0;
             }
-
-            console.log(d);
+            
             d.depth = depth;
             if (d._children) {
                 d._children.forEach(c => resetDepth(c, depth + 1));
