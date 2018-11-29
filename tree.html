@@ -21,29 +21,42 @@
         const margin = ({top: 10, right: 120, bottom: 10, left: 40});
 
         const height = 500;
-        const width = 1000;
+        const width = 1500;
 
-        const dy = 10;
-        const dx = 160;
+        const dy = 30;
+        const dx = 10;
 
         const tree = d3.tree().nodeSize([dx, dy]);
         
         function transform(node) {
-            return {name: node.value, children: node.next.map(transform)};
+            return {
+                name: node.value, children: node.next.map(transform)
+            };
+        }
+
+        function resetDepth(d, depth) {
+            if (!depth) {
+                depth = 0;
+            }
+
+            console.log(d);
+            d.depth = depth;
+            if (d._children )
+                d._children.forEach(c => resetDepth(c, depth + 1));
         }
         
         data = transform(mapping.get("1" ));
 
         console.dir(data);
 
-        const root = d3.hierarchy(data);
+        let root = d3.hierarchy(data);
 
         root.x0 = dy / 2;
         root.y0 = 0;
         root.descendants().forEach((d, i) => {
             d.id = i;
             d._children = d.children;
-            if (d.depth && d.data.name.length !== 7) d.children = null;
+            //if (d.depth && d.data.name.length !== 7) d.children = null;
         });
 
         const svg = d3.select("#visje")
@@ -95,8 +108,15 @@
                 .attr("fill-opacity", 0)
                 .attr("stroke-opacity", 0)
                 .on("click", d => {
-                    d.children = d.children ? null : d._children;
-                    update(d);
+                    if (d === root) {
+                        root = d.exRoot;
+                    }
+                    else {
+                        d.exRoot = root;
+                        root = d;
+                    }
+                    resetDepth(root);
+                    update(root);
                 });
 
             nodeEnter.append("circle")
