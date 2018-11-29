@@ -40,7 +40,7 @@
             if (!depth) {
                 depth = 0;
             }
-            
+
             d.depth = depth;
             
             if (d.depth >= maxDepth) {
@@ -129,7 +129,7 @@
                 });
 
             nodeEnter.append("circle")
-                .attr("r", 2.5)
+                .attr("r", 4)
                 .attr("fill", d => d._children ? "#555" : "#999");
 
             nodeEnter.append("text")
