@@ -58,7 +58,7 @@ function addCollatz(i) {
 
 console.dir(mapping.get("1"));
 
-var stop = 1000;
+var stop = 6000;
 for(var i = 1; i<stop; i++) {
     addCollatz(i);
 }
