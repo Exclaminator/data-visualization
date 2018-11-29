@@ -13,6 +13,15 @@ var CollatzNode = (function () {
     CollatzNode.prototype.getValue = function () {
         return this.value;
     };
+
+    CollatzNode.prototype.traverseDown = function (nodeVisitor) {
+        nodeVisitor(this);
+
+        if (this.previous) {
+            this.previous.traverseDown(nodeVisitor);
+        }
+    }
+
     return CollatzNode;
 })();
 
@@ -32,18 +41,18 @@ function getPrev(n) {
     }
 }
 
-mapping.set("1", new CollatzNode("1"));
+mapping.set(1, new CollatzNode(1));
 
 function addCollatz(i) {
-    if (mapping.has(i + "")) {
-        return mapping.get(i + "");
+    if (mapping.has(i)) {
+        return mapping.get(i);
     }
 
     var prev = getPrev(i);
-    var node = new CollatzNode(i + "");
+    var node = new CollatzNode(i);
 
     node.setPrev(addCollatz(prev));
-    mapping.set(i + "", node);
+    mapping.set(i, node);
     return node;
 }
 
