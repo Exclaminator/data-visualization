@@ -20,7 +20,7 @@
     <script>
         console.log(Date.now());
 
-        const maxDepth = 15; 
+        const maxDepthRelative = 15;
 
         const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
         const margin = ({top: 10, right: 120, bottom: 10, left: 40});
@@ -33,53 +33,34 @@
 
         const tree = d3.tree().nodeSize([dx, dy]);
 
-        function resetDepth(d, depth) {
-            if (!depth) {
-                depth = 0;
-            }
-
-            d.depth = depth;
-            
-            if (d.depth >= maxDepth) {
-                d.children = null;
-            } else {
-                d.children = d._children;  
-                if (d._children) {
-                    d._children.forEach(c => resetDepth(c, depth + 1));
+        function makeHierarchy(collatzNodeAsRoot) {
+            console.dir(collatzNodeAsRoot);
+            let root = d3.hierarchy(collatzNodeAsRoot, d => {
+                if (d.depth() < maxDepthRelative + collatzNodeAsRoot.depth()) {
+                    return d.children();
                 }
-            }
+                else {
+                    return null;
+                }
+            });
 
+            root.x0 = dy / 2;
+            root.y0 = 0;
+            root.descendants().forEach((d, i) => {
+                d.id = d.data.value();
+                // d._children = d.children;
+                // if (d.depth >= maxDepth) d.children = null;
+            });
+
+            return root;
         }
 
+        let rootStack = [];
+
         let conjecture = new CollatzConjectureFast();
-        let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1, 0);
+        let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
         
-        // data = transform(rootNodeCollatz);
-        // let lim = rootNodeCollatz.value()*Math.pow(2,20);
-        // rootNodeCollatz.depth = 1;
-        let root = d3.hierarchy(rootNodeCollatz, d => {
-            console.log(d)
-            // if (isNaN(d.depth)) {
-            //     // console.log("sdfdsf")
-            //     // console.log(d.parent())
-            //     d.depth = d.parent().depth + 1;
-            // }
-
-            if (d.depth() < maxDepth) {
-            // if (d.value() < lim)
-                return d.children();
-            }
-        });
-
-        console.dir(root)
-
-        root.x0 = dy / 2;
-        root.y0 = 0;
-        root.descendants().forEach((d, i) => {
-            d.id = i;
-            // d._children = d.children;
-            // if (d.depth >= maxDepth) d.children = null;
-        });
+        let root = makeHierarchy(rootNodeCollatz);
 
         const svg = d3.select("#visje")
             .attr("width", width)
@@ -122,7 +103,7 @@
 
             // Update the nodes…
             const node = gNode.selectAll("g")
-            .data(nodes, d => d.id);
+                .data(nodes, d => d.id);
 
             // Enter any new nodes at the parent's previous position.
             const nodeEnter = node.enter().append("g")
@@ -130,14 +111,16 @@
                 .attr("fill-opacity", 0)
                 .attr("stroke-opacity", 0)
                 .on("click", d => {
-                    if (d === root) {
-                        root = d.exRoot;
+                    console.log(d);
+                    console.log(root);
+                    if (d.id === root.id) {
+                        root = rootStack.pop();
                     }
                     else {
-                        d.exRoot = root;
+                        rootStack.push(root);
                         root = d;
                     }
-                    resetDepth(root);
+                    root = makeHierarchy(root.data);
                     update(root);
                 });
 
