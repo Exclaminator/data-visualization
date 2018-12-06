@@ -9,19 +9,41 @@ interface CollatzConjecture {
     childrenOf(collatzNumber: CollatzNumber);
 }
 
-class CollatzConjectureDefault implements CollatzConjecture {
+class CollatzNumbers {
     private map: Map<number, CollatzNumber>;
+    private makeNewCollatzNumber: (value: number) => CollatzNumber;
+
+    constructor(map: Map<number, CollatzNumber>, makeNewCollatzNumber: (value: number) => CollatzNumber) {
+        this.map = map;
+        this.makeNewCollatzNumber = makeNewCollatzNumber;
+    }
+
+    getOrNew(value: number): CollatzNumber {
+        if (!this.map.has(value)) {
+            let newCollatz = this.makeNewCollatzNumber(value);
+            this.map.set(value, newCollatz);
+        }
+
+        return this.map.get(value);
+    }
+}
+
+class CollatzConjectureDefault implements CollatzConjecture {
+    private collatzNumbers: CollatzNumbers;
 
     constructor() {
-        this.map = new Map<number, CollatzNumber>();
+        this.collatzNumbers = new CollatzNumbers(
+            new Map<number, CollatzNumber>(),
+                value => new CollatzNumberSimple(this, value)
+        );
     }
 
     childrenOf(collatzNumber: CollatzNumber) {
         let value = collatzNumber.value();
 
-        let r = [new CollatzNumberSimple(this, value*2)];
+        let r = [this.collatzNumbers.getOrNew(value*2)];
         if (value % 6 == 4) {
-            r.push(new CollatzNumberSimple(this,(value-1)/3));
+            r.push(this.collatzNumbers.getOrNew((value-1)/3));
         }
 
         return r;
@@ -32,11 +54,7 @@ class CollatzConjectureDefault implements CollatzConjecture {
             return;
         }
 
-        let parent = new CollatzNumberSimple(this, this.getPrev(collatzNumber.value()));
-        if (!this.map.has(parent.value())) {
-            this.map.set(parent.value(), parent);
-        }
-        return parent;
+        return this.collatzNumbers.getOrNew(this.getPrev(collatzNumber.value()));
     }
 
     private getPrev(n) {
@@ -51,18 +69,21 @@ class CollatzConjectureDefault implements CollatzConjecture {
 }
 
 class CollatzConjectureFast implements CollatzConjecture {
-    private map: Map<number, CollatzNumber>;
+    private collatzNumbers: CollatzNumbers;
 
     constructor() {
-        this.map = new Map<number, CollatzNumber>();
+        this.collatzNumbers = new CollatzNumbers(
+            new Map<number, CollatzNumber>(),
+            value => new CollatzNumberSimple(this, value)
+    );
     }
 
     childrenOf(collatzNumber: CollatzNumber) {
         let value = collatzNumber.value();
 
-        let r = [new CollatzNumberSimple(this, value*2)];
+        let r = [this.collatzNumbers.getOrNew(value*2)];
         if (value % 3 == 2) {
-            r.push(new CollatzNumberSimple(this,(value*2 - 1) * 3));
+            r.push(this.collatzNumbers.getOrNew((value*2 - 1) * 3));
         }
 
         return r;
@@ -73,10 +94,7 @@ class CollatzConjectureFast implements CollatzConjecture {
             return;
         }
 
-        let parent = new CollatzNumberSimple(this, this.getPrev(collatzNumber.value()));
-        if (!this.map.has(parent.value())) {
-            this.map.set(parent.value(), parent);
-        }
+        let parent = this.collatzNumbers.getOrNew(this.getPrev(collatzNumber.value()));
         return parent;
     }
 
