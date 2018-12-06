@@ -48,7 +48,47 @@ class CollatzConjectureDefault implements CollatzConjecture {
             return 3 * n + 1;
         }
     }
+}
 
+class CollatzConjectureFast implements CollatzConjecture {
+    private map: Map<number, CollatzNumber>;
+
+    constructor() {
+        this.map = new Map<number, CollatzNumber>();
+    }
+
+    childrenOf(collatzNumber: CollatzNumber) {
+        let value = collatzNumber.value();
+
+        let r = [new CollatzNumberSimple(this, value*2)];
+        if (value % 3 == 2) {
+            r.push(new CollatzNumberSimple(this,(value*2 - 1) * 3));
+        }
+
+        return r;
+    }
+
+    parentOf(collatzNumber: CollatzNumber): CollatzNumber | undefined {
+        if (collatzNumber.value() == 1) {
+            return;
+        }
+
+        let parent = new CollatzNumberSimple(this, this.getPrev(collatzNumber.value()));
+        if (!this.map.has(parent.value())) {
+            this.map.set(parent.value(), parent);
+        }
+        return parent;
+    }
+
+    private getPrev(n) {
+        let isEven = !(n & 1);
+
+        if (isEven) {
+            return n / 2;
+        } else {
+            return (3 * n + 1)/2;
+        }
+    }
 }
 
 class CollatzNumberSimple implements CollatzNumber {
@@ -88,8 +128,8 @@ class CollatzNumberSimple implements CollatzNumber {
     }
 }
 
-let collatzConjectureDefault = new CollatzConjectureDefault();
-let collatzNumber: CollatzNumber = new CollatzNumberSimple(collatzConjectureDefault, 20);
+let collatzConjecture = new CollatzConjectureFast();
+let collatzNumber: CollatzNumber = new CollatzNumberSimple(collatzConjecture, 20);
 
 while (collatzNumber.value() > 1) {
     console.log(`Value: ${collatzNumber}`);
