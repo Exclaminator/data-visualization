@@ -2,6 +2,7 @@ interface CollatzNumber {
     parent(): CollatzNumber;
     children(): CollatzNumber[];
     value(): number;
+    depth(): number;
 }
 
 interface CollatzConjecture {
@@ -75,7 +76,7 @@ class CollatzConjectureFast implements CollatzConjecture {
         this.collatzNumbers = new CollatzNumbers(
             new Map<number, CollatzNumber>(),
             value => new CollatzNumberSimple(this, value)
-    );
+        );
     }
 
     childrenOf(collatzNumber: CollatzNumber) {
@@ -115,10 +116,12 @@ class CollatzNumberSimple implements CollatzNumber {
     private _value: number;
     private _children: CollatzNumber[];
     private _parent: CollatzNumber;
+    private _depth: number | undefined;
 
     constructor(conjecture: CollatzConjecture, value: number) {
         this.conjecture = conjecture;
         this._value = value;
+        this._depth = value == 1 ? 0 : undefined;
     }
 
     children(): CollatzNumber[] {
@@ -139,6 +142,14 @@ class CollatzNumberSimple implements CollatzNumber {
 
     value(): number {
         return this._value;
+    }
+
+    depth(): number {
+        if (this._depth === undefined) {
+            this._depth = this.parent().depth() + 1;
+        }
+
+        return this._depth;
     }
 
     toString(): string {
