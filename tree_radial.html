@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Trees</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <!-- <script src="./d3.v4.min.js"></script> -->
+        <script src="./Collatz.js"></script>
+        
+
+    </head>
+    <body>
+        <svg id="visje"></svg>
+    </body>
+
+    <script>
+        console.log(Date.now());
+
+        const maxDepthRelative = 15;
+
+        // const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+        // const margin = ({top: 10, right: 120, bottom: 10, left: 40});
+
+        const height = 500;
+        const width = 1500;
+        const radius = width / 2;
+
+        const dy = 30;
+        const dx = 10;
+
+        // const tree = d3.tree().nodeSize([dx, dy]);
+
+        function makeHierarchy(collatzNodeAsRoot) {
+            console.dir(collatzNodeAsRoot);
+            let root = d3.hierarchy(collatzNodeAsRoot, d => {
+                if (d.depth() < maxDepthRelative + collatzNodeAsRoot.depth()) {
+                    return d.children();
+                }
+                else {
+                    return null;
+                }
+            });
+
+            root.x0 = dy / 2;
+            root.y0 = 0;
+            root.descendants().forEach((d, i) => {
+                d.id = d.data.value();
+                // d._children = d.children;
+                // if (d.depth >= maxDepth) d.children = null;
+            });
+
+            return root;
+        }
+
+        let rootStack = [];
+
+        let conjecture = new CollatzConjectureFast();
+        let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
+
+        let tree = data => d3.tree()
+            .size([Math.PI, radius])
+            .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth)
+            (d3.hierarchy(data, d => {
+                if (d.depth() < maxDepthRelative) { // + collatzNodeAsRoot.depth()) {
+                    return d.children();
+                }
+                else {
+                    return null;
+                }
+            }));
+
+        const root = tree(rootNodeCollatz);
+
+        const svg = d3.select("svg")
+            .style("width", "46%")
+            .style("height", "100%")
+            .style("padding", "10px")
+            .style("box-sizing", "border-box")
+            .style("font", "10px sans-serif");
+
+        const g = svg.append("g");
+
+        const link = g.append("g")
+            .attr("fill", "none")
+            .attr("stroke", "#555")
+            .attr("stroke-opacity", 0.4)
+            .attr("stroke-width", 1.5)
+            .selectAll("path")
+            .data(root.links())
+            .enter().append("path")
+            .attr("d", d3.linkRadial()
+                .angle(d => d.x)
+                .radius(d => d.y));
+
+        const node = g.append("g")
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-width", 3)
+            .selectAll("g")
+            .data(root.descendants().reverse())
+            .enter().append("g")
+            .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
+
+        node.append("circle")
+            .attr("fill", d => d.children ? "#555" : "#999")
+            .attr("r", 2.5);
+
+        node.append("text")
+            .attr("dy", "0.31em")
+            .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
+            .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+            .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+            .text(d => d.data.value())
+            .clone(true).lower()
+            .attr("stroke", "white");
+
+        document.body.appendChild(svg.node());
+
+        const box = g.node().getBBox();
+
+        svg//.remove()
+            .attr("width", box.width)
+            .attr("height", box.height)
+            .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
+
+        svg.node();
+    </script>
+
+</html>
