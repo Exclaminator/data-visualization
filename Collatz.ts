@@ -157,16 +157,16 @@ class CollatzNumberSimple implements CollatzNumber {
     }
 }
 
-let collatzConjecture = new CollatzConjectureFast();
-let collatzNumber: CollatzNumber = new CollatzNumberSimple(collatzConjecture, 20);
-
-while (collatzNumber.value() > 1) {
-    console.log(`Value: ${collatzNumber}`);
-    collatzNumber = collatzNumber.parent();
-}
-
-// collatzNumber = new CollatzNumberSimple()
-while (collatzNumber.value() < 1000) {
-    console.log(`Value: ${collatzNumber}, children: ${collatzNumber.children()}`);
-    collatzNumber = collatzNumber.children()[0];
-}
+// let collatzConjecture = new CollatzConjectureFast();
+// let collatzNumber: CollatzNumber = new CollatzNumberSimple(collatzConjecture, 20);
+//
+// while (collatzNumber.value() > 1) {
+//     console.log(`Value: ${collatzNumber}`);
+//     collatzNumber = collatzNumber.parent();
+// }
+//
+// // collatzNumber = new CollatzNumberSimple()
+// while (collatzNumber.value() < 1000) {
+//     console.log(`Value: ${collatzNumber}, children: ${collatzNumber.children()}`);
+//     collatzNumber = collatzNumber.children()[0];
+// }
