@@ -43,7 +43,7 @@ class CollatzConjectureDefault implements CollatzConjecture {
         let value = collatzNumber.value();
 
         let r = [this.collatzNumbers.getOrNew(value*2)];
-        if (value % 6 == 4) {
+        if (value % 6 == 4 && value != 4) {
             r.push(this.collatzNumbers.getOrNew((value-1)/3));
         }
 
@@ -83,8 +83,8 @@ class CollatzConjectureFast implements CollatzConjecture {
         let value = collatzNumber.value();
 
         let r = [this.collatzNumbers.getOrNew(value*2)];
-        if (value % 3 == 2) {
-            r.push(this.collatzNumbers.getOrNew((value*2 - 1) * 3));
+        if (value % 3 == 2 && value != 2) {
+            r.push(this.collatzNumbers.getOrNew((value*2 - 1) / 3));
         }
 
         return r;
@@ -121,7 +121,7 @@ class CollatzNumberSimple implements CollatzNumber {
     constructor(conjecture: CollatzConjecture, value: number) {
         this.conjecture = conjecture;
         this._value = value;
-        this._depth = value == 1 ? 0 : undefined;
+        this._depth = undefined;
     }
 
     children(): CollatzNumber[] {
@@ -146,7 +146,12 @@ class CollatzNumberSimple implements CollatzNumber {
 
     depth(): number {
         if (this._depth === undefined) {
-            this._depth = this.parent().depth() + 1;
+            if (this.value() === 1) {
+                this._depth = 0;
+            }
+            else {
+                this._depth = this.parent().depth() + 1;
+            }
         }
 
         return this._depth;
@@ -159,12 +164,12 @@ class CollatzNumberSimple implements CollatzNumber {
 
 // let collatzConjecture = new CollatzConjectureFast();
 // let collatzNumber: CollatzNumber = new CollatzNumberSimple(collatzConjecture, 20);
-//
+
 // while (collatzNumber.value() > 1) {
 //     console.log(`Value: ${collatzNumber}`);
 //     collatzNumber = collatzNumber.parent();
 // }
-//
+
 // // collatzNumber = new CollatzNumberSimple()
 // while (collatzNumber.value() < 1000) {
 //     console.log(`Value: ${collatzNumber}, children: ${collatzNumber.children()}`);
