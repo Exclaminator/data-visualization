@@ -24,6 +24,7 @@ class CollatzConjectureDefault implements CollatzConjecture {
             r.push(new CollatzNumberSimple(this,(value-1)/3));
         }
 
+        r.forEach(v => {if(this.map.has(v.value)) this.map.set(v.value, v)});
         return r;
     }
 
@@ -65,6 +66,7 @@ class CollatzConjectureFast implements CollatzConjecture {
             r.push(new CollatzNumberSimple(this,(value*2 - 1) * 3));
         }
 
+        r.forEach(v => {if(this.map.has(v.value)) this.map.set(v.value, v)});
         return r;
     }
 
