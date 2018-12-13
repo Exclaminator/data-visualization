@@ -9,11 +9,13 @@
         <script src="https://d3js.org/d3.v5.min.js"></script>
         <!-- <script src="./d3.v4.min.js"></script> -->
         <script src="./Collatz.js"></script>
+        <script src="./utils.js"></script>
         
 
     </head>
     <body>
         <svg id="visje"></svg>
+        <svg id="jan"></svg>
     </body>
 
     <script>
@@ -26,106 +28,121 @@
 
         const height = 500;
         const width = 1500;
-        const radius = width / 2;
+        const radius = width / 4;
 
         const dy = 30;
         const dx = 10;
 
         // const tree = d3.tree().nodeSize([dx, dy]);
 
-        function makeHierarchy(collatzNodeAsRoot) {
-            console.dir(collatzNodeAsRoot);
-            let root = d3.hierarchy(collatzNodeAsRoot, d => {
-                if (d.depth() < maxDepthRelative + collatzNodeAsRoot.depth()) {
-                    return d.children();
-                }
-                else {
-                    return null;
-                }
-            });
-
-            root.x0 = dy / 2;
-            root.y0 = 0;
-            root.descendants().forEach((d, i) => {
-                d.id = d.data.value();
-                // d._children = d.children;
-                // if (d.depth >= maxDepth) d.children = null;
-            });
-
-            return root;
+        function isPowTwo(number) {
+            return (number !== 0) && ((number & (number - 1)) === 0);
         }
 
         let rootStack = [];
 
         let conjecture = new CollatzConjectureFast();
         let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
+        let node = makeRadialTree(rootNodeCollatz);
+        replaceTree(node);
 
-        let tree = data => d3.tree()
-            .size([Math.PI, radius])
-            .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth)
-            (d3.hierarchy(data, d => {
-                if (d.depth() < maxDepthRelative) { // + collatzNodeAsRoot.depth()) {
-                    return d.children();
-                }
-                else {
-                    return null;
-                }
-            }));
+        function replaceTree(newNode) {
+            document.getElementById('jan').outerHTML = newNode.outerHTML
+        }
 
-        const root = tree(rootNodeCollatz);
+        function makeRadialTree(collatzNode) {
+            // d3.select("svg").innerHtml("");
 
-        const svg = d3.select("svg")
-            .style("width", "46%")
-            .style("height", "100%")
-            .style("padding", "10px")
-            .style("box-sizing", "border-box")
-            .style("font", "10px sans-serif");
+            let tree = data => d3.tree()
+                .size([Math.PI * 2, radius])
+                .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth)
+                (d3.hierarchy(data, d => {
+                    if (d.depth() < maxDepthRelative) { // + collatzNodeAsRoot.depth()) {
+                        return d.children();
+                    } else {
+                        return null;
+                    }
+                }));
 
-        const g = svg.append("g");
+            const root = tree(rootNodeCollatz);
 
-        const link = g.append("g")
-            .attr("fill", "none")
-            .attr("stroke", "#555")
-            .attr("stroke-opacity", 0.4)
-            .attr("stroke-width", 1.5)
-            .selectAll("path")
-            .data(root.links())
-            .enter().append("path")
-            .attr("d", d3.linkRadial()
-                .angle(d => d.x)
-                .radius(d => d.y));
+            const svg = d3.select("svg")
+                // .style("width", "46%")
+                .style("height", "100%")
+                .style("padding", "10px")
+                .style("box-sizing", "border-box")
+                .style("font", "10px sans-serif");
 
-        const node = g.append("g")
-            .attr("stroke-linejoin", "round")
-            .attr("stroke-width", 3)
-            .selectAll("g")
-            .data(root.descendants().reverse())
-            .enter().append("g")
-            .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
+            const g = svg.append("g");
 
-        node.append("circle")
-            .attr("fill", d => d.children ? "#555" : "#999")
-            .attr("r", 2.5);
+            const link = g.append("g")
+                .attr("fill", "none")
+                .attr("stroke", "#555")
+                .attr("stroke-opacity", 0.4)
+                .attr("stroke-width", 1.5)
+                .selectAll("path")
+                .data(root.links())
+                .enter().append("path")
+                .attr("d", d3.linkRadial()
+                    .angle(d => d.x)
+                    .radius(d => d.y));
 
-        node.append("text")
-            .attr("dy", "0.31em")
-            .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
-            .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
-            .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
-            .text(d => d.data.value())
-            .clone(true).lower()
-            .attr("stroke", "white");
+            const node = g.append("g")
+                .attr("stroke-linejoin", "round")
+                .attr("stroke-width", 3)
+                .selectAll("g")
+                .data(root.descendants().reverse())
+                .enter().append("g")
+                .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
 
-        document.body.appendChild(svg.node());
+            node.append("circle")
+                .attr("fill", d => isPowTwo(d.data.value()) ? "#aaa" : "#0463c6")// d.children ? "#555" : "#999")
+                .attr("r", 4)
+                .on("click", d => {
+                    /* store/load the root node */
+                    let node;
+                    if (d.data.value() === root.data.value()) {
+                        // clicked on root
+                        node = makeRadialTree(rootStack.pop().data);
+                    } else {
+                        rootStack.push(root);
+                        node = makeRadialTree(d.data);
+                    }
+                    replaceTree(node)
+                });
 
-        const box = g.node().getBBox();
+            node.append("text")
+            // .attr("dy", "0.31em")
+                .attr("dy", d => {
+                    if (!d.children) {
+                        return "0.4em";
+                    }
+                    return isEven(d.depth) ? "-0.5em" : "1.2em"
+                })
+                // .attr("dx", d => d.x < Math.PI ? -2 : -10)
+                .attr("x", d => d.x < Math.PI ? 6 : -6)
+                .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
+                .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+                .text(d => d.data.value())
+                .clone(true).lower()
+                .attr("stroke", "white")
+                .attr("text-align", "left");
 
-        svg//.remove()
-            .attr("width", box.width)
-            .attr("height", box.height)
-            .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
+            document.body.appendChild(svg.node());
 
-        svg.node();
+            const box = g.node().getBBox();
+
+            svg.remove()
+                .attr("width", box.width)
+                .attr("height", box.height)
+                .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
+
+            // console.log(document.getElementById('visje'))
+            let henk = document.getElementById("svg")
+            console.dir(henk)
+            //.item().innerHTML = svg.node().outerHTML;
+            return svg.node();
+        }
     </script>
 
 </html>
