@@ -37,7 +37,7 @@
         let m = 5;
         colorScheme = ["#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#98df8a", "#d62728", "#ff9896", "#9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5"];
         
-        var amount = 100;
+        var amount = 200;
 
         // const tree = d3.tree().nodeSize([dx, dy]);
 
@@ -63,6 +63,30 @@
 
         function replaceTree(newNode) {
             document.getElementById('jan').outerHTML = newNode.outerHTML
+
+            // update onclick and mouse events here.
+            d3.select("svg").selectAll("circle")
+            .on("mouseover", function(d) {
+                const nd = rootNodeCollatz.get(this.dataset.value);
+                (highlight(nd, nd))();
+            })
+            .on("mouseout", function(d) {
+                const nd = rootNodeCollatz.get(this.dataset.value);
+                (delight(nd, nd))();
+            })
+            .on("click", function(d) {
+                const nd = rootNodeCollatz.get(this.dataset.value);
+                /* store/load the root node */
+                let node;
+                if (nd.value() === root.data.value()) {
+                    // clicked on root
+                    node = makeRadialTree(rootStack.pop().data);
+                } else {
+                    rootStack.push(root);
+                    node = makeRadialTree(nd);
+                }
+                replaceTree(node)
+            });
         }
 
         function makeRadialTree(collatzNode) {
@@ -114,18 +138,21 @@
                 .attr("fill", d => colorScheme[d.data.value()%m])
                 .attr("r", 7)
                 .attr("id", d => "circle" + d.data.value())
-                .on("click", d => {
-                    /* store/load the root node */
-                    let node;
-                    if (d.data.value() === root.data.value()) {
-                        // clicked on root
-                        node = makeRadialTree(rootStack.pop().data);
-                    } else {
-                        rootStack.push(root);
-                        node = makeRadialTree(d.data);
-                    }
-                    replaceTree(node)
-                });
+                .attr("data-value", d => d.data.value())
+                // .on("mouseover", d => highlight(d.data, d.data))
+                // .on("mouseout", d => delight(d.data, d.data))
+                // .on("click", d => {
+                //     /* store/load the root node */
+                //     let node;
+                //     if (d.data.value() === root.data.value()) {
+                //         // clicked on root
+                //         node = makeRadialTree(rootStack.pop().data);
+                //     } else {
+                //         rootStack.push(root);
+                //         node = makeRadialTree(d.data);
+                //     }
+                //     replaceTree(node)
+                // });
 
             function isEven(n) {
                 return !(n & 1);
@@ -167,12 +194,20 @@
         //////
         // mouse-in and -out functions
         //////
+        var prevHighlightedNode;
+        var prevHighlightedinnernode;
+
         function highlight(node, innernode) {
             return _ => {
+                // delight(prevHighlightedNode, prevHighlightedinnernode);
+                // prevHighlightedNode = node;
+                // prevHighlightedinnernode = innernode;
                 var nd = node;
                 for (var i = 0; i <= node.depth(); i++) {
                     d3.select("#circle"+nd.value())
-                        .style("stroke", (nd.value() == innernode.value()? "red" : "black"));
+                        .style("stroke", (nd.value() == innernode.value()? colorScheme[m] : "black"));
+                    d3.selectAll(".bar"+nd.value())
+                        .style("stroke", (nd.value() == innernode.value()? colorScheme[m] : "black"));
                     nd = nd.parent();
                 }
             }
@@ -184,6 +219,8 @@
                 for (var i = 0; i <= node.depth(); i++) {
                     d3.select("#circle"+nd.value())
                     .style("stroke", "none");
+                    d3.selectAll(".bar"+nd.value())
+                        .style("stroke", "none");
                     nd = nd.parent();
                 }
             }
@@ -222,8 +259,7 @@
                         .attr("width", squareWidth)
                         .attr("height", squareHeight)
                         .attr("title", innernode.value())
-                        .attr("id", "bar"+innernode.value())
-                        .attr("class", "cBar"+node.value())
+                        .attr("class", "bar"+innernode.value() + " cBar"+node.value())
                         .on("mouseover", highlight(node, innernode))
                         .on("mouseout", delight(node, innernode))
                         .attr("fill", colorScheme[innernode.value() % m]);

@@ -5,6 +5,7 @@ interface CollatzNumber {
     depth(): number;
     next(): CollatzNumber;
     prev(): CollatzNumber | undefined;
+    get(target: number) : CollatzNumber;
 }
 
 interface CollatzConjecture {
@@ -12,6 +13,7 @@ interface CollatzConjecture {
     childrenOf(collatzNumber: CollatzNumber);
     nextValue(collatzNumber: CollatzNumber);
     prevValue(collatzNumber: CollatzNumber);
+    get(target: number): CollatzNumber;
 }
 
 class CollatzNumbers {
@@ -74,6 +76,10 @@ class CollatzConjectureDefault implements CollatzConjecture {
         return this.collatzNumbers.getOrNew(collatzNumber.value() - 1);
     }
 
+    get(target: number) {
+        return this.collatzNumbers.getOrNew(target);
+    }
+
     private getPrev(n) {
         let isEven = !(n & 1);
 
@@ -127,6 +133,10 @@ class CollatzConjectureFast implements CollatzConjecture {
         return this.collatzNumbers.getOrNew(collatzNumber.value() - 1);
     }
 
+    get(target: number) {
+        return this.collatzNumbers.getOrNew(target);
+    }
+    
     private getPrev(n) {
         let isEven = !(n & 1);
 
@@ -184,6 +194,10 @@ class CollatzNumberSimple implements CollatzNumber {
         }
         
         return this._prev;
+    }
+
+    get(target: number) : CollatzNumber {
+        return this.conjecture.get(target);
     }
 
     value(): number {
