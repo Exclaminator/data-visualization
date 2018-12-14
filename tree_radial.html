@@ -37,6 +37,7 @@
         let m = 5;
         colorScheme = ["#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#98df8a", "#d62728", "#ff9896", "#9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5"];
         
+        var amount = 100;
 
         // const tree = d3.tree().nodeSize([dx, dy]);
 
@@ -47,8 +48,9 @@
         let rootStack = [];
         
         // TODO: add conjecture input
-        function redraw(_m, _root) {
+        function redraw(_m, _root, _amount) {
             m = _m;
+            amount = _amount;
             // TODO: redraw tree logic here
 
             barChart(_root);
@@ -111,6 +113,7 @@
             node.append("circle")
                 .attr("fill", d => colorScheme[d.data.value()%m])
                 .attr("r", 7)
+                .attr("id", d => "circle" + d.data.value())
                 .on("click", d => {
                     /* store/load the root node */
                     let node;
@@ -160,15 +163,36 @@
             //.item().innerHTML = svg.node().outerHTML;
             return svg.node();
         }
+        
+        //////
+        // mouse-in and -out functions
+        //////
+        function highlight(node, innernode) {
+            return _ => {
+                var nd = node;
+                for (var i = 0; i <= node.depth(); i++) {
+                    d3.select("#circle"+nd.value())
+                        .style("stroke", (nd.value() == innernode.value()? "red" : "black"));
+                    nd = nd.parent();
+                }
+            }
+        }
 
+        function delight(node, innernode) {
+            return _ => {
+                var nd = node;
+                for (var i = 0; i <= node.depth(); i++) {
+                    d3.select("#circle"+nd.value())
+                    .style("stroke", "none");
+                    nd = nd.parent();
+                }
+            }
+        }
         ///////
         // Bar chart
         ///////
 
-        function barChart(root) {
-            console.dir(root);
-            const amount = 400;
-            
+        function barChart(root) {            
             var node = root;
             var maxDepth = 0;
             for (var i = 0; i < amount; i++) {
@@ -187,15 +211,21 @@
             
             node = root;
             var innernode = root;
+
             for (var i = 0; i < amount; i++) {
                 innernode = node;
                 for (var j = 0; j <= node.depth(); j++) {
                     svgContainer.append("rect")
                         .attr("x", i*squareWidth)
-                        .attr("y", height - (j*squareHeight))
+                        //.attr("y", height - (j*squareHeight))     // inverted version
+                        .attr("y", height - (node.depth()+1)*squareHeight + (j*squareHeight))
                         .attr("width", squareWidth)
                         .attr("height", squareHeight)
                         .attr("title", innernode.value())
+                        .attr("id", "bar"+innernode.value())
+                        .attr("class", "cBar"+node.value())
+                        .on("mouseover", highlight(node, innernode))
+                        .on("mouseout", delight(node, innernode))
                         .attr("fill", colorScheme[innernode.value() % m]);
                     innernode = innernode.parent();
                 }
