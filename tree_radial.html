@@ -45,6 +45,14 @@
         }
 
         let rootStack = [];
+        
+        // TODO: add conjecture input
+        function redraw(_m, _root) {
+            m = _m;
+            // TODO: redraw tree logic here
+
+            barChart(_root);
+        }
 
         let conjecture = new CollatzConjectureFast();
         let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
