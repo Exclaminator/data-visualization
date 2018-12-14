@@ -21,17 +21,22 @@
     <script>
         console.log(Date.now());
 
-        const maxDepthRelative = 15;
+        const maxDepthRelative = 17;
 
         // const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
         // const margin = ({top: 10, right: 120, bottom: 10, left: 40});
 
-        const height = 500;
-        const width = 1500;
-        const radius = width / 4;
+        const height = window.innerHeight;
+        const width = window.innerWidth/2;
+        const radius = width / 2 - 60;
 
         const dy = 30;
         const dx = 10;
+
+        // colorscheme size = m, max is 20.
+        let m = 5;
+        colorScheme = ["#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#98df8a", "#d62728", "#ff9896", "#9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5"];
+        
 
         // const tree = d3.tree().nodeSize([dx, dy]);
 
@@ -94,10 +99,10 @@
                 .data(root.descendants().reverse())
                 .enter().append("g")
                 .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
-
+            
             node.append("circle")
-                .attr("fill", d => isPowTwo(d.data.value()) ? "#aaa" : "#0463c6")// d.children ? "#555" : "#999")
-                .attr("r", 4)
+                .attr("fill", d => colorScheme[d.data.value()%m])
+                .attr("r", 7)
                 .on("click", d => {
                     /* store/load the root node */
                     let node;
@@ -110,6 +115,10 @@
                     }
                     replaceTree(node)
                 });
+
+            function isEven(n) {
+                return !(n & 1);
+            }
 
             node.append("text")
             // .attr("dy", "0.31em")
@@ -143,6 +152,58 @@
             //.item().innerHTML = svg.node().outerHTML;
             return svg.node();
         }
+
+        ///////
+        // Bar chart
+        ///////
+
+        function barChart(root) {
+            console.dir(root);
+            const amount = 400;
+            
+            var node = root;
+            var maxDepth = 0;
+            for (var i = 0; i < amount; i++) {
+                maxDepth = Math.max(node.depth(), maxDepth);
+                node = node.next();
+            }
+
+            const squareHeight = height / (maxDepth + 1);
+            const squareWidth = width / amount;
+
+            d3.select("#blokje").remove();
+            var svgContainer = d3.select("body").append("svg")
+                .attr("id", "blokje")
+                .attr("width", width)
+                .attr("height", height);
+            
+            node = root;
+            var innernode = root;
+            for (var i = 0; i < amount; i++) {
+                innernode = node;
+                for (var j = 0; j <= node.depth(); j++) {
+                    svgContainer.append("rect")
+                        .attr("x", i*squareWidth)
+                        .attr("y", height - (j*squareHeight))
+                        .attr("width", squareWidth)
+                        .attr("height", squareHeight)
+                        .attr("title", innernode.value())
+                        .attr("fill", colorScheme[innernode.value() % m]);
+                    innernode = innernode.parent();
+                }
+                node = node.next();
+            }
+            // collatzNumbersToPlot.forEach(function(d, i) {
+            //     let dp = d.value;
+            //     let j = 0;
+            //     d.traverseDown(function(d) {
+                    
+            //         dp = d.value;
+            //         j++;
+            //     });
+            // });
+        }
+        barChart(rootNodeCollatz);
     </script>
 
 </html>

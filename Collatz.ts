@@ -3,11 +3,15 @@ interface CollatzNumber {
     children(): CollatzNumber[];
     value(): number;
     depth(): number;
+    next(): CollatzNumber;
+    prev(): CollatzNumber | undefined;
 }
 
 interface CollatzConjecture {
     parentOf(collatzNumber: CollatzNumber);
     childrenOf(collatzNumber: CollatzNumber);
+    nextValue(collatzNumber: CollatzNumber);
+    prevValue(collatzNumber: CollatzNumber);
 }
 
 class CollatzNumbers {
@@ -58,6 +62,18 @@ class CollatzConjectureDefault implements CollatzConjecture {
         return this.collatzNumbers.getOrNew(this.getPrev(collatzNumber.value()));
     }
 
+    nextValue(collatzNumber: CollatzNumber): CollatzNumber {
+        return this.collatzNumbers.getOrNew(collatzNumber.value() + 1);
+    }
+
+    prevValue(collatzNumber: CollatzNumber): CollatzNumber | undefined  {
+        if (collatzNumber.value() == 1) {
+            return;
+        }
+
+        return this.collatzNumbers.getOrNew(collatzNumber.value() - 1);
+    }
+
     private getPrev(n) {
         let isEven = !(n & 1);
 
@@ -99,6 +115,18 @@ class CollatzConjectureFast implements CollatzConjecture {
         return parent;
     }
 
+    nextValue(collatzNumber: CollatzNumber): CollatzNumber {
+        return this.collatzNumbers.getOrNew(collatzNumber.value() + 1);
+    }
+
+    prevValue(collatzNumber: CollatzNumber): CollatzNumber | undefined  {
+        if (collatzNumber.value() == 1) {
+            return;
+        }
+
+        return this.collatzNumbers.getOrNew(collatzNumber.value() - 1);
+    }
+
     private getPrev(n) {
         let isEven = !(n & 1);
 
@@ -117,6 +145,8 @@ class CollatzNumberSimple implements CollatzNumber {
     private _children: CollatzNumber[];
     private _parent: CollatzNumber;
     private _depth: number | undefined;
+    private _next: CollatzNumber;
+    private _prev: CollatzNumber | undefined;
 
     constructor(conjecture: CollatzConjecture, value: number) {
         this.conjecture = conjecture;
@@ -138,6 +168,22 @@ class CollatzNumberSimple implements CollatzNumber {
         }
 
         return this._parent;
+    }
+
+    next() : CollatzNumber {
+        if (!this._next) {
+            this._next = this.conjecture.nextValue(this);
+        }
+        
+        return this._next;
+    }
+
+    prev() : CollatzNumber | undefined{
+        if (!this._prev) {
+            this._prev = this.conjecture.prevValue(this);
+        }
+        
+        return this._prev;
     }
 
     value(): number {
