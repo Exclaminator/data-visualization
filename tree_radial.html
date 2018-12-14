@@ -14,8 +14,8 @@
 
     </head>
     <body>
-        <svg id="visje"></svg>
-        <svg id="jan"></svg>
+        <svg id="radial_tree"></svg>
+        <svg id="barchart"></svg>
     </body>
 
     <script>
@@ -27,7 +27,7 @@
         // const margin = ({top: 10, right: 120, bottom: 10, left: 40});
 
         const height = window.innerHeight;
-        const width = window.innerWidth/2;
+        const width = window.innerWidth/2 - 50;
         const radius = width / 2 - 60;
 
         const dy = 30;
@@ -62,10 +62,8 @@
         replaceTree(node);
 
         function replaceTree(newNode) {
-            document.getElementById('jan').outerHTML = newNode.outerHTML
-
             // update onclick and mouse events here.
-            d3.select("svg").selectAll("circle")
+            d3.select("#radial_tree").selectAll("circle")
             .on("mouseover", function(d) {
                 const nd = rootNodeCollatz.get(this.dataset.value);
                 (highlight(nd, nd))();
@@ -75,12 +73,18 @@
                 (delight(nd, nd))();
             })
             .on("click", function(d) {
+                console.log("clicked"); 
                 const nd = rootNodeCollatz.get(this.dataset.value);
+                const root = rootNodeCollatz.get(this.dataset.root);
+                console.log(this.dataset);
+                console.log(root);
+                console.log(rootStack);
+                console.log(nd.value);
                 /* store/load the root node */
                 let node;
-                if (nd.value() === root.data.value()) {
+                if (rootStack.length > 0 && nd.value() === rootStack[rootStack.length - 1].value()) {
                     // clicked on root
-                    node = makeRadialTree(rootStack.pop().data);
+                    node = makeRadialTree(rootStack.pop());
                 } else {
                     rootStack.push(root);
                     node = makeRadialTree(nd);
@@ -96,16 +100,22 @@
                 .size([Math.PI * 2, radius])
                 .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth)
                 (d3.hierarchy(data, d => {
-                    if (d.depth() < maxDepthRelative) { // + collatzNodeAsRoot.depth()) {
+                    if (d.depth() < maxDepthRelative + collatzNode.depth() - Math.log(d.depth())) { // + collatzNodeAsRoot.depth()) {
                         return d.children();
                     } else {
                         return null;
                     }
                 }));
 
-            const root = tree(rootNodeCollatz);
+            const root = tree(collatzNode);
 
-            const svg = d3.select("svg")
+            d3.select("#radial_tree").remove();
+            d3.select("body")
+                .insert("svg", "#barchart")
+                .attr("id", "radial_tree");
+
+
+            const svg = d3.select("#radial_tree")
                 // .style("width", "46%")
                 .style("height", "100%")
                 .style("padding", "10px")
@@ -135,10 +145,11 @@
                 .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
             
             node.append("circle")
-                .attr("fill", d => colorScheme[d.data.value()%m])
+                .attr("fill", d => (d == root)? "black" : colorScheme[d.data.value()%m])
                 .attr("r", 7)
                 .attr("id", d => "circle" + d.data.value())
                 .attr("data-value", d => d.data.value())
+                .attr("data-root",root.data.value())
                 // .on("mouseover", d => highlight(d.data, d.data))
                 // .on("mouseout", d => delight(d.data, d.data))
                 // .on("click", d => {
@@ -175,18 +186,23 @@
                 .attr("stroke", "white")
                 .attr("text-align", "left");
 
-            document.body.appendChild(svg.node());
+            //document.body.appendChild(svg.node());
 
             const box = g.node().getBBox();
-
-            svg.remove()
-                .attr("width", box.width)
-                .attr("height", box.height)
+            
+            svg
+                .attr("width", width)
+                .attr("height", height)
                 .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
 
+            // svg
+            //     .attr("width", box.width)
+            //     .attr("height", box.height)
+            //     .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
+
             // console.log(document.getElementById('visje'))
-            let henk = document.getElementById("svg")
-            console.dir(henk)
+            // let henk = document.getElementById("svg")
+            // console.dir(henk)
             //.item().innerHTML = svg.node().outerHTML;
             return svg.node();
         }
@@ -240,9 +256,9 @@
             const squareHeight = height / (maxDepth + 1);
             const squareWidth = width / amount;
 
-            d3.select("#blokje").remove();
+            d3.select("#barchart").remove();
             var svgContainer = d3.select("body").append("svg")
-                .attr("id", "blokje")
+                .attr("id", "barchart")
                 .attr("width", width)
                 .attr("height", height);
             
