@@ -80,12 +80,15 @@
                 let node;
                 if (rootStack.length > 0 && nd == root) {
                     // clicked on root
-                    node = makeRadialTree(rootStack.pop());
+                    const nod = rootStack.pop();
+                    node = makeRadialTree(nod);
+                    barChart(nod);
                 } else {
                     rootStack.push(root);
                     node = makeRadialTree(nd);
+                    barChart(nd);
                 }
-                replaceTree(node)
+                replaceTree(node);
             });
         }
 
@@ -242,7 +245,8 @@
         // Bar chart
         ///////
 
-        function barChart(root) {            
+        function barChart(root) {
+            console.log(root);      
             var node = root;
             var maxDepth = 0;
             for (var i = 0; i < amount; i++) {
