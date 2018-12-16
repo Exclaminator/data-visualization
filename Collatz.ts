@@ -23,9 +23,12 @@ class CollatzNumbers {
         if (!this.map.has(value)) {
             let newCollatz = this.makeNewCollatzNumber(value);
             this.map.set(value, newCollatz);
+            return newCollatz;
+        }
+        else {
+            return this.map.get(value);
         }
 
-        return this.map.get(value);
     }
 }
 
@@ -95,7 +98,8 @@ class CollatzConjectureFast implements CollatzConjecture {
             return;
         }
 
-        let parent = this.collatzNumbers.getOrNew(this.getPrev(collatzNumber.value()));
+        let parentValue = this.getPrev(collatzNumber.value());
+        let parent = this.collatzNumbers.getOrNew(parentValue);
         return parent;
     }
 
