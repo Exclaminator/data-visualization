@@ -14,24 +14,30 @@
 
     </head>
     <body>
-        <svg id="visje"></svg>
-        <svg id="jan"></svg>
+        <svg id="radial_tree"></svg>
+        <svg id="barchart"></svg>
     </body>
 
     <script>
         console.log(Date.now());
 
-        const maxDepthRelative = 15;
+        const maxDepthRelative = 17;
 
         // const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
         // const margin = ({top: 10, right: 120, bottom: 10, left: 40});
 
-        const height = 500;
-        const width = 1500;
-        const radius = width / 4;
+        const height = window.innerHeight;
+        const width = window.innerWidth/2 - 50;
+        const radius = width / 2 - 60;
 
         const dy = 30;
         const dx = 10;
+
+        // colorscheme size = m, max is 20.
+        let m = 5;
+        colorScheme = ["#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#98df8a", "#d62728", "#ff9896", "#9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5"];
+        
+        var amount = 200;
 
         // const tree = d3.tree().nodeSize([dx, dy]);
 
@@ -40,6 +46,15 @@
         }
 
         let rootStack = [];
+        
+        // TODO: add conjecture input
+        function redraw(_m, _root, _amount) {
+            m = _m;
+            amount = _amount;
+            // TODO: redraw tree logic here
+
+            barChart(_root);
+        }
 
         let conjecture = new CollatzConjectureFast();
         let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
@@ -47,26 +62,60 @@
         replaceTree(node);
 
         function replaceTree(newNode) {
-            document.getElementById('jan').outerHTML = newNode.outerHTML
+            // update onclick and mouse events here.
+            d3.select("#radial_tree").selectAll("circle")
+            .on("mouseover", function(d) {
+                const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
+                (highlight(nd, nd))();
+            })
+            .on("mouseout", function(d) {
+                const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
+                (delight(nd, nd))();
+            })
+            .on("click", function(d) {
+                const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
+                const root = rootNodeCollatz.get(parseInt(this.dataset.root));
+                console.log(rootStack);
+                /* store/load the root node */
+                let node;
+                if (rootStack.length > 0 && nd == root) {
+                    // clicked on root
+                    const nod = rootStack.pop();
+                    node = makeRadialTree(nod);
+                    barChart(nod);
+                } else {
+                    rootStack.push(root);
+                    node = makeRadialTree(nd);
+                    barChart(nd);
+                }
+                replaceTree(node);
+            });
         }
 
         function makeRadialTree(collatzNode) {
+            console.log(collatzNode);
             // d3.select("svg").innerHtml("");
 
             let tree = data => d3.tree()
                 .size([Math.PI * 2, radius])
                 .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth)
                 (d3.hierarchy(data, d => {
-                    if (d.depth() < maxDepthRelative) { // + collatzNodeAsRoot.depth()) {
+                    if (d.depth() < maxDepthRelative + collatzNode.depth() - Math.log(d.depth())) { // + collatzNodeAsRoot.depth()) {
                         return d.children();
                     } else {
                         return null;
                     }
                 }));
 
-            const root = tree(rootNodeCollatz);
+            const root = tree(collatzNode);
 
-            const svg = d3.select("svg")
+            d3.select("#radial_tree").remove();
+            d3.select("body")
+                .insert("svg", "#barchart")
+                .attr("id", "radial_tree");
+
+
+            const svg = d3.select("#radial_tree")
                 // .style("width", "46%")
                 .style("height", "100%")
                 .style("padding", "10px")
@@ -94,22 +143,31 @@
                 .data(root.descendants().reverse())
                 .enter().append("g")
                 .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
-
+            
             node.append("circle")
-                .attr("fill", d => isPowTwo(d.data.value()) ? "#aaa" : "#0463c6")// d.children ? "#555" : "#999")
-                .attr("r", 4)
-                .on("click", d => {
-                    /* store/load the root node */
-                    let node;
-                    if (d.data.value() === root.data.value()) {
-                        // clicked on root
-                        node = makeRadialTree(rootStack.pop().data);
-                    } else {
-                        rootStack.push(root);
-                        node = makeRadialTree(d.data);
-                    }
-                    replaceTree(node)
-                });
+                .attr("fill", d => (d == root)? "black" : colorScheme[d.data.value()%m])
+                .attr("r", 7)
+                .attr("id", d => "circle" + d.data.value())
+                .attr("data-value", d => d.data.value())
+                .attr("data-root",root.data.value())
+                // .on("mouseover", d => highlight(d.data, d.data))
+                // .on("mouseout", d => delight(d.data, d.data))
+                // .on("click", d => {
+                //     /* store/load the root node */
+                //     let node;
+                //     if (d.data.value() === root.data.value()) {
+                //         // clicked on root
+                //         node = makeRadialTree(rootStack.pop().data);
+                //     } else {
+                //         rootStack.push(root);
+                //         node = makeRadialTree(d.data);
+                //     }
+                //     replaceTree(node)
+                // });
+
+            function isEven(n) {
+                return !(n & 1);
+            }
 
             node.append("text")
             // .attr("dy", "0.31em")
@@ -128,21 +186,115 @@
                 .attr("stroke", "white")
                 .attr("text-align", "left");
 
-            document.body.appendChild(svg.node());
+            //document.body.appendChild(svg.node());
 
             const box = g.node().getBBox();
-
-            svg.remove()
-                .attr("width", box.width)
-                .attr("height", box.height)
+            
+            svg
+                .attr("width", width)
+                .attr("height", height)
                 .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
 
+            // svg
+            //     .attr("width", box.width)
+            //     .attr("height", box.height)
+            //     .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
+
             // console.log(document.getElementById('visje'))
-            let henk = document.getElementById("svg")
-            console.dir(henk)
+            // let henk = document.getElementById("svg")
+            // console.dir(henk)
             //.item().innerHTML = svg.node().outerHTML;
             return svg.node();
         }
+        
+        //////
+        // mouse-in and -out functions
+        //////
+        var prevHighlightedNode;
+        var prevHighlightedinnernode;
+
+        function highlight(node, innernode) {
+            return _ => {
+                // delight(prevHighlightedNode, prevHighlightedinnernode);
+                // prevHighlightedNode = node;
+                // prevHighlightedinnernode = innernode;
+                var nd = node;
+                for (var i = 0; i <= node.depth(); i++) {
+                    d3.select("#circle"+nd.value())
+                        .style("stroke", (nd.value() == innernode.value()? colorScheme[m] : "black"));
+                    d3.selectAll(".bar"+nd.value())
+                        .style("stroke", (nd.value() == innernode.value()? colorScheme[m] : "black"));
+                    nd = nd.parent();
+                }
+            }
+        }
+
+        function delight(node, innernode) {
+            return _ => {
+                var nd = node;
+                for (var i = 0; i <= node.depth(); i++) {
+                    d3.select("#circle"+nd.value())
+                    .style("stroke", "none");
+                    d3.selectAll(".bar"+nd.value())
+                        .style("stroke", "none");
+                    nd = nd.parent();
+                }
+            }
+        }
+        ///////
+        // Bar chart
+        ///////
+
+        function barChart(root) {
+            console.log(root);      
+            var node = root;
+            var maxDepth = 0;
+            for (var i = 0; i < amount; i++) {
+                maxDepth = Math.max(node.depth(), maxDepth);
+                node = node.next();
+            }
+
+            const squareHeight = height / (maxDepth + 1);
+            const squareWidth = width / amount;
+
+            d3.select("#barchart").remove();
+            var svgContainer = d3.select("body").append("svg")
+                .attr("id", "barchart")
+                .attr("width", width)
+                .attr("height", height);
+            
+            node = root;
+            var innernode = root;
+
+            for (var i = 0; i < amount; i++) {
+                innernode = node;
+                for (var j = 0; j <= node.depth(); j++) {
+                    svgContainer.append("rect")
+                        .attr("x", i*squareWidth)
+                        //.attr("y", height - (j*squareHeight))     // inverted version
+                        .attr("y", height - (node.depth()+1)*squareHeight + (j*squareHeight))
+                        .attr("width", squareWidth)
+                        .attr("height", squareHeight)
+                        .attr("title", innernode.value())
+                        .attr("class", "bar"+innernode.value() + " cBar"+node.value())
+                        .on("mouseover", highlight(node, innernode))
+                        .on("mouseout", delight(node, innernode))
+                        .attr("fill", colorScheme[innernode.value() % m]);
+                    innernode = innernode.parent();
+                }
+                node = node.next();
+            }
+            // collatzNumbersToPlot.forEach(function(d, i) {
+            //     let dp = d.value;
+            //     let j = 0;
+            //     d.traverseDown(function(d) {
+                    
+            //         dp = d.value;
+            //         j++;
+            //     });
+            // });
+        }
+        barChart(rootNodeCollatz);
     </script>
 
 </html>

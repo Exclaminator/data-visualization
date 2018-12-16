@@ -1,9 +1,10 @@
 var mapping = new Map();
 
 var CollatzNode = (function () {
-    function CollatzNode(value) {
+    function CollatzNode(value, next, fast) {
         this.value = value;
-        this.next = [];
+        if (typeof next == "undefined") next = [];
+        if (typeof fast == "undefined") fast = false;
     }
     CollatzNode.prototype.setPrev = function (node) {
         this.previous = node;
@@ -39,6 +40,13 @@ function getPrev(n) {
     } else {
         return 3 * n + 1;
     }
+}
+
+// makes a fast map
+function getNext(n) {
+    var r = [2*n];
+    if (n%3 == 2) r.push((2*n-1)/3);
+    return r;
 }
 
 mapping.set(1, new CollatzNode(1));
