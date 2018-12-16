@@ -154,7 +154,7 @@
                 .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
             
             node.append("circle")
-                .attr("fill", d => (d == root)? "black" : colorScheme[d.data.value()%m])
+                .attr("fill", d => (d == root)? colorScheme[m+1] : colorScheme[d.data.value()%m])
                 .attr("r", 7)
                 .attr("id", d => "circle" + d.data.value())
                 .attr("data-value", d => d.data.value())
@@ -228,9 +228,9 @@
                 var nd = node;
                 for (var i = 0; i <= node.depth(); i++) {
                     d3.select("#circle"+nd.value())
-                        .style("stroke", (nd.value() == innernode.value()? colorScheme[m] : "black"));
+                        .style("stroke", (nd.value() == innernode.value()? colorScheme[m] : colorScheme[m+1]));
                     d3.selectAll(".bar"+nd.value())
-                        .style("stroke", (nd.value() == innernode.value()? colorScheme[m] : "black"));
+                        .style("stroke", (nd.value() == innernode.value()? colorScheme[m] : colorScheme[m+1]));
                     nd = nd.parent();
                 }
             }
@@ -297,7 +297,7 @@
                                 updateRoot(innernode, root);
                             }
                         })(innernode))
-                        .attr("fill", (innernode.value() == root.value()) ? "black" : colorScheme[innernode.value() % m]);
+                        .attr("fill", (innernode.value() == root.value()) ? colorScheme[m+1] : colorScheme[innernode.value() % m]);
                     innernode = innernode.parent();
                 }
                 node = node.next();
