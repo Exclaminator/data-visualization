@@ -79,6 +79,7 @@
         var amount = 200;
 
         let rootStack = [];
+        
 
         // const tree = d3.tree().nodeSize([dx, dy]);
 
@@ -90,41 +91,22 @@
         $("#colors-slider")[0].value = m;
 
         function changeNumColors(newNumColors) {
-            redraw(newNumColors, rootNodeCollatz, amount);
+            redraw(newNumColors, currentRoot, amount);
         }
-        
+
         // TODO: add conjecture input
         function redraw(_m, _root, _amount) {
             m = _m;
             amount = _amount;
             // TODO: redraw tree logic here
-            barChart(_root);
             makeRadialTree(_root);
+            barChart(_root);
         }
 
         let conjecture = new CollatzConjectureFast();
         let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
         let node = makeRadialTree(rootNodeCollatz);
-        replaceTree(node);
-
-        function replaceTree(newNode) {
-            // update onclick and mouse events here.
-            d3.select("#radial_tree").selectAll("circle")
-            .on("mouseover", function(d) {
-                const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
-                (highlight(nd, nd))();
-            })
-            // .on("mouseout", function(d) {
-            //     const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
-            //     (delight(nd, nd))();
-            // })
-            .on("click", function(d) {
-                const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
-                const root = rootNodeCollatz.get(parseInt(this.dataset.root));
-                updateRoot(nd, root);
-            });
-        }
-        
+        let currentRoot = rootNodeCollatz;
 
         /**
          *  nd = new root
@@ -139,12 +121,14 @@
                 const nod = rootStack.pop();
                 node = makeRadialTree(nod);
                 barChart(nod);
+                currentRoot = nod;
             } else {
                 rootStack.push(root);
                 node = makeRadialTree(nd);
                 barChart(nd);
+                currentRoot = nd;
             }
-            replaceTree(node);
+            //replaceTree(node);
         }
 
         function makeRadialTree(collatzNode) {
@@ -203,7 +187,7 @@
                 .attr("r", 7)
                 .attr("id", d => "circle" + d.data.value())
                 .attr("data-value", d => d.data.value())
-                .attr("data-root",root.data.value());
+                .attr("data-root", root.data.value());
 
             function isEven(n) {
                 return !(n & 1);
@@ -230,6 +214,19 @@
                 .attr("width", width)
                 .attr("height", height)
                 .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
+                
+            
+            // update onclick and mouse events here.
+            d3.select("#radial_tree").selectAll("circle")
+            .on("mouseover", function(d) {
+                const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
+                (highlight(nd, nd))();
+            })
+            .on("click", function(d) {
+                const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
+                const root = rootNodeCollatz.get(parseInt(this.dataset.root));
+                updateRoot(nd, root);
+            });
 
             return svg.node();
         }
@@ -249,9 +246,9 @@
                 unlight();
                 var nd = node;
                 for (var i = 0; i <= node.depth(); i++) {
-                    d3.select("#circle"+nd.value())
+                    d3.select("#radial_tree").select("#circle"+nd.value())
                         .style("stroke", (nd.value() == innernode.value()? colorScheme[m] : colorScheme[m+1]));
-                    d3.selectAll(".bar"+nd.value())
+                    d3.select("#barchart").selectAll(".bar"+nd.value())
                         .style("stroke", (nd.value() == innernode.value()? colorScheme[m] : colorScheme[m+1]));
                     nd = nd.parent();
                 }
