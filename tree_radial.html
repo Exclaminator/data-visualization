@@ -68,28 +68,37 @@
                 const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
                 (highlight(nd, nd))();
             })
-            .on("mouseout", function(d) {
-                const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
-                (delight(nd, nd))();
-            })
+            // .on("mouseout", function(d) {
+            //     const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
+            //     (delight(nd, nd))();
+            // })
             .on("click", function(d) {
                 const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
                 const root = rootNodeCollatz.get(parseInt(this.dataset.root));
-                console.log(rootStack);
-                /* store/load the root node */
-                let node;
-                if (rootStack.length > 0 && nd == root) {
-                    // clicked on root
-                    const nod = rootStack.pop();
-                    node = makeRadialTree(nod);
-                    barChart(nod);
-                } else {
-                    rootStack.push(root);
-                    node = makeRadialTree(nd);
-                    barChart(nd);
-                }
-                replaceTree(node);
+                updateRoot(nd, root);
             });
+        }
+        
+
+        /**
+         *  nd = new root
+         *  root = old root
+         */
+
+        function updateRoot(nd, root) {
+            /* store/load the root node */
+            let node;
+            if (rootStack.length > 0 && nd == root) {
+                // clicked on root
+                const nod = rootStack.pop();
+                node = makeRadialTree(nod);
+                barChart(nod);
+            } else {
+                rootStack.push(root);
+                node = makeRadialTree(nd);
+                barChart(nd);
+            }
+            replaceTree(node);
         }
 
         function makeRadialTree(collatzNode) {
@@ -215,9 +224,7 @@
 
         function highlight(node, innernode) {
             return _ => {
-                // delight(prevHighlightedNode, prevHighlightedinnernode);
-                // prevHighlightedNode = node;
-                // prevHighlightedinnernode = innernode;
+                unlight();
                 var nd = node;
                 for (var i = 0; i <= node.depth(); i++) {
                     d3.select("#circle"+nd.value())
@@ -229,18 +236,24 @@
             }
         }
 
-        function delight(node, innernode) {
-            return _ => {
-                var nd = node;
-                for (var i = 0; i <= node.depth(); i++) {
-                    d3.select("#circle"+nd.value())
-                    .style("stroke", "none");
-                    d3.selectAll(".bar"+nd.value())
-                        .style("stroke", "none");
-                    nd = nd.parent();
-                }
-            }
+        
+        function unlight() {
+            d3.select("#radial_tree").selectAll("circle").style("stroke", "none");
+            d3.select("#barchart").selectAll("rect").style("stroke", "none");
         }
+
+        // function delight(node, innernode) {
+        //     return _ => {
+        //         var nd = node;
+        //         for (var i = 0; i <= node.depth(); i++) {
+        //             d3.select("#circle"+nd.value())
+        //             .style("stroke", "none");
+        //             d3.selectAll(".bar"+nd.value())
+        //                 .style("stroke", "none");
+        //             nd = nd.parent();
+        //         }
+        //     }
+        // }
         ///////
         // Bar chart
         ///////
@@ -278,8 +291,13 @@
                         .attr("title", innernode.value())
                         .attr("class", "bar"+innernode.value() + " cBar"+node.value())
                         .on("mouseover", highlight(node, innernode))
-                        .on("mouseout", delight(node, innernode))
-                        .attr("fill", colorScheme[innernode.value() % m]);
+                        // .on("mouseout", delight(node, innernode))
+                        .on("click", (innernode => {
+                            return _ => {
+                                updateRoot(innernode, root);
+                            }
+                        })(innernode))
+                        .attr("fill", (innernode.value() == root.value()) ? "black" : colorScheme[innernode.value() % m]);
                     innernode = innernode.parent();
                 }
                 node = node.next();
