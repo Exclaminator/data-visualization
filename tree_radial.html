@@ -171,7 +171,6 @@
 
 
             const svg = d3.select("#radial_tree")
-                // .style("width", "46%")
                 .style("height", "100%")
                 .style("padding", "10px")
                 .style("box-sizing", "border-box")
@@ -204,35 +203,19 @@
                 .attr("r", 7)
                 .attr("id", d => "circle" + d.data.value())
                 .attr("data-value", d => d.data.value())
-                .attr("data-root",root.data.value())
-                // .on("mouseover", d => highlight(d.data, d.data))
-                // .on("mouseout", d => delight(d.data, d.data))
-                // .on("click", d => {
-                //     /* store/load the root node */
-                //     let node;
-                //     if (d.data.value() === root.data.value()) {
-                //         // clicked on root
-                //         node = makeRadialTree(rootStack.pop().data);
-                //     } else {
-                //         rootStack.push(root);
-                //         node = makeRadialTree(d.data);
-                //     }
-                //     replaceTree(node)
-                // });
+                .attr("data-root",root.data.value());
 
             function isEven(n) {
                 return !(n & 1);
             }
 
             node.append("text")
-            // .attr("dy", "0.31em")
                 .attr("dy", d => {
                     if (!d.children) {
                         return "0.4em";
                     }
                     return isEven(d.depth) ? "-0.5em" : "1.2em"
                 })
-                // .attr("dx", d => d.x < Math.PI ? -2 : -10)
                 .attr("x", d => d.x < Math.PI ? 6 : -6)
                 .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
                 .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
@@ -241,8 +224,6 @@
                 .attr("stroke", "white")
                 .attr("text-align", "left");
 
-            //document.body.appendChild(svg.node());
-
             const box = g.node().getBBox();
             
             svg
@@ -250,15 +231,6 @@
                 .attr("height", height)
                 .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
 
-            // svg
-            //     .attr("width", box.width)
-            //     .attr("height", box.height)
-            //     .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
-
-            // console.log(document.getElementById('visje'))
-            // let henk = document.getElementById("svg")
-            // console.dir(henk)
-            //.item().innerHTML = svg.node().outerHTML;
             return svg.node();
         }
         
@@ -292,19 +264,6 @@
             d3.select("#barchart").selectAll("rect").style("stroke", "none");
         }
 
-        // function delight(node, innernode) {
-        //     return _ => {
-        //         var nd = node;
-        //         for (var i = 0; i <= node.depth(); i++) {
-        //             d3.select("#circle"+nd.value())
-        //             .style("stroke", "none");
-        //             d3.selectAll(".bar"+nd.value())
-        //                 .style("stroke", "none");
-        //             nd = nd.parent();
-        //         }
-        //     }
-        // }
-        
         ///////
         // Bar chart
         ///////
@@ -353,15 +312,6 @@
                 }
                 node = node.next();
             }
-            // collatzNumbersToPlot.forEach(function(d, i) {
-            //     let dp = d.value;
-            //     let j = 0;
-            //     d.traverseDown(function(d) {
-                    
-            //         dp = d.value;
-            //         j++;
-            //     });
-            // });
         }
         barChart(rootNodeCollatz);
     </script>
