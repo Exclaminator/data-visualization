@@ -39,13 +39,14 @@
 
         var amount = 200;
 
+        let rootStack = [];
+
         // const tree = d3.tree().nodeSize([dx, dy]);
 
         function isPowTwo(number) {
             return (number !== 0) && ((number & (number - 1)) === 0);
         }
 
-        let rootStack = [];
         
         // TODO: add conjecture input
         function redraw(_m, _root, _amount) {
