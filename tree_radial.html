@@ -213,6 +213,10 @@
         var prevHighlightedNode;
         var prevHighlightedinnernode;
 
+        /**
+        * @param node "the element of the column (topmost) i.e. elem that generates the column"
+        * @param innternode "the element in the column you're hovering over"
+        */
         function highlight(node, innernode) {
             return _ => {
                 // delight(prevHighlightedNode, prevHighlightedinnernode);
@@ -241,10 +245,10 @@
                 }
             }
         }
+
         ///////
         // Bar chart
         ///////
-
         function barChart(root) {
             console.log(root);      
             var node = root;
@@ -254,6 +258,7 @@
                 node = node.next();
             }
 
+            // don't remove the +1, hacky reasons
             const squareHeight = height / (maxDepth + 1);
             const squareWidth = width / amount;
 
