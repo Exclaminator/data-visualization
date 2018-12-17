@@ -1,4 +1,4 @@
-export class ModuloColorScheme {
+class ModuloColorScheme {
     constructor(modulo) {
         this.modulo = modulo;
         this.colorScheme = [

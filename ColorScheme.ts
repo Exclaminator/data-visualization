@@ -1,9 +1,9 @@
-export interface ColorScheme {
+interface ColorScheme {
     forNumber(value: number): string;
     forSpecial(): string;
 }
 
-export class ModuloColorScheme implements ColorScheme {
+class ModuloColorScheme implements ColorScheme {
     private readonly colorScheme = [
         "#1f77b4",
         "#aec7e8",
