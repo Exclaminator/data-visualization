@@ -10,7 +10,6 @@
         <!-- <script src="./d3.v4.min.js"></script> -->
         <script src="./Collatz.js"></script>
         <script src="./ColorScheme.js"></script>
-        <script src="./utils.js"></script>
         
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         
@@ -111,26 +110,22 @@
         
 
         /**
-         *  nd = new root
-         *  root = old root
+         *  @param newRoot The selected node, if same as current root will reset to previous root
          */
-
-        function updateRoot(nd, root) {
+        function updateRoot(newRoot) {
             /* store/load the root node */
-            let node;
-            if (rootStack.length > 0 && nd == root) {
+            if (rootStack.length > 0 && newRoot === currentRoot) {
                 // clicked on root
                 const nod = rootStack.pop();
-                node = makeRadialTree(nod);
+                currentRoot = makeRadialTree(nod);
                 barChart(nod);
                 currentRoot = nod;
             } else {
-                rootStack.push(root);
-                node = makeRadialTree(nd);
-                barChart(nd);
-                currentRoot = nd;
+                rootStack.push(currentRoot);
+                currentRoot = makeRadialTree(newRoot);
+                barChart(newRoot);
+                currentRoot = newRoot;
             }
-            //replaceTree(node);
         }
 
         function makeRadialTree(collatzNode) {
@@ -223,8 +218,7 @@
             })
             .on("click", function(d) {
                 const nd = rootNodeCollatz.get(d.data.value());
-                const root = rootNodeCollatz.get(d.data.root());
-                updateRoot(nd, root);
+                updateRoot(nd);
             });
 
             return svg.node();
@@ -241,7 +235,7 @@
         * @param innternode "the element in the column you're hovering over"
         */
         function highlight(node, innernode) {
-            return _ => {
+            return () => {
                 unlight();
                 var nd = node;
                 for (var i = 0; i <= node.depth(); i++) {
@@ -299,8 +293,8 @@
                         .on("mouseover", highlight(node, innernode))
                         // .on("mouseout", delight(node, innernode))
                         .on("click", (innernode => {
-                            return _ => {
-                                updateRoot(innernode, root);
+                            return () => {
+                                updateRoot(innernode);
                             }
                         })(innernode))
                         .attr("fill", (innernode.value() == root.value()) ? colorScheme.forSpecial(1) : colorScheme.forNumber(innernode.value()));
