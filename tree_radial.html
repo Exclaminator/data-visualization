@@ -44,7 +44,7 @@
                 </div>
                 <div class="form-group">
                     <label for="treedepth-slider">Tree depth</label>
-                    <input type="range" class="form-control-range" id="treedepth-slider" min="1" max="15">
+                    <input type="range" class="form-control-range" id="treedepth-slider" min="1" max="20" onmouseup="changeTreeDepth(this.value)">
                 </div>
                 <div class="form-group">
                     <label for="barchartwidth-slider">Barchart width (columns)</label>
@@ -60,7 +60,7 @@
     <script>
         console.log(Date.now());
 
-        const maxDepthRelative = 17;
+        let maxDepthRelative = 10;
 
         // const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
         // const margin = ({top: 10, right: 120, bottom: 10, left: 40});
@@ -89,24 +89,73 @@
 
         // init UI positions
         $("#colors-slider")[0].value = m;
+        $("#treedepth-slider")[0].value = maxDepthRelative;
 
         function changeNumColors(newNumColors) {
-            redraw(newNumColors, currentRoot, amount);
+            redraw(newNumColors, rootNodeCollatz, amount, maxDepthRelative);
+        }
+
+        function changeTreeDepth(newTreeDepth) {
+            redraw(m, rootNodeCollatz, amount, newTreeDepth)
         }
 
         // TODO: add conjecture input
-        function redraw(_m, _root, _amount) {
-            m = _m;
-            amount = _amount;
-            // TODO: redraw tree logic here
-            makeRadialTree(_root);
-            barChart(_root);
+        function redraw(_m, _root, _amount, _treeDepth) {
+
+            let redrawBar = false;
+            let redrawTree = false;
+
+            if (m !== _m) {
+                m = _m;
+                redrawBar = true;
+                redrawTree = true;
+            }
+            
+            if (amount != _amount) {
+                amount = _amount;
+                redrawBar = true;
+            }
+
+            if (maxDepthRelative != _treeDepth) {
+                console.log(`new depth: ${_treeDepth}, old depth = ${maxDepthRelative}`)
+                maxDepthRelative = _treeDepth;
+                redrawTree = true;
+            }
+        
+            if (redrawBar) {
+                barChart(_root);
+            }
+
+            if (redrawTree) {
+                makeRadialTree(_root);
+                replaceTree(node);
+            }
         }
 
         let conjecture = new CollatzConjectureFast();
         let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
         let node = makeRadialTree(rootNodeCollatz);
         let currentRoot = rootNodeCollatz;
+        replaceTree(node);
+
+        function replaceTree(newNode) {
+            // update onclick and mouse events here.
+            d3.select("#radial_tree").selectAll("circle")
+            .on("mouseover", function(d) {
+                const nd = rootNodeCollatz.get(parseInt(d.dataset.value));
+                (highlight(nd, nd))();
+            })
+            // .on("mouseout", function(d) {
+            //     const nd = rootNodeCollatz.get(parseInt(this.dataset.value));
+            //     (delight(nd, nd))();
+            // })
+            .on("click", function(d) {
+                const nd = rootNodeCollatz.get(parseInt(d.dataset.value));
+                const root = rootNodeCollatz.get(parseInt(d.dataset.root));
+                updateRoot(nd, root);
+            });
+        }
+        
 
         /**
          *  nd = new root
@@ -132,9 +181,6 @@
         }
 
         function makeRadialTree(collatzNode) {
-            console.log(collatzNode);
-            // d3.select("svg").innerHtml("");
-
             let tree = data => d3.tree()
                 .size([Math.PI * 2, radius])
                 .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth)
