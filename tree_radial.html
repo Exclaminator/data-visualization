@@ -61,15 +61,14 @@
     <script>
         console.log(Date.now());
 
-        let maxDepthRelative = 10;
-
-        // const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
-        // const margin = ({top: 10, right: 120, bottom: 10, left: 40});
+        let rootStack = [];
+        let maxTreeDepthRelative = 10;
+        var barChart_numHorizontalElements = 200;
 
         const height = window.innerHeight;
         const width = window.innerWidth/2 - 50;
-        const radius = width / 2 - 60;
 
+        const radius = width / 2 - 60;
         const dy = 30;
         const dx = 10;
 
@@ -77,60 +76,34 @@
         let m = 5;
         let colorScheme = new ModuloColorScheme(m);
 
-        var amount = 200;
-
-        let rootStack = [];
-        
-
-        // const tree = d3.tree().nodeSize([dx, dy]);
-
-        function isPowTwo(number) {
-            return (number !== 0) && ((number & (number - 1)) === 0);
-        }
-
         // init UI positions
         $("#colors-slider")[0].value = m;
-        $("#treedepth-slider")[0].value = maxDepthRelative;
+        $("#treedepth-slider")[0].value = maxTreeDepthRelative;
 
         function changeNumColors(newNumColors) {
-            redraw(newNumColors, rootNodeCollatz, amount, maxDepthRelative);
+            redraw(newNumColors, rootNodeCollatz, barChart_numHorizontalElements, maxTreeDepthRelative);
         }
 
         function changeTreeDepth(newTreeDepth) {
-            redraw(m, rootNodeCollatz, amount, newTreeDepth)
+            redraw(m, rootNodeCollatz, barChart_numHorizontalElements, newTreeDepth)
         }
 
         // TODO: add conjecture input
         function redraw(_m, _root, _amount, _treeDepth) {
 
-            let redrawBar = false;
-            let redrawTree = false;
-
-            if (m !== _m) {
-                m = _m;
-                redrawBar = true;
-                redrawTree = true;
-            }
-            
-            if (amount != _amount) {
-                amount = _amount;
-                redrawBar = true;
+            if (barChart_numHorizontalElements != _amount) {
+                barChart_numHorizontalElements = _amount;
             }
 
-            if (maxDepthRelative != _treeDepth) {
-                console.log(`new depth: ${_treeDepth}, old depth = ${maxDepthRelative}`)
-                maxDepthRelative = _treeDepth;
-                redrawTree = true;
-            }
-        
-            if (redrawBar) {
-                barChart(_root);
+            if (maxTreeDepthRelative != _treeDepth) {
+                console.log(`new depth: ${_treeDepth}, old depth = ${maxTreeDepthRelative}`)
+                maxTreeDepthRelative = _treeDepth;
             }
 
-            if (redrawTree) {
-                makeRadialTree(_root);
-                replaceTree(node);
-            }
+            barChart(_root);
+
+            makeRadialTree(_root);
+            replaceTree(node);
         }
 
         let conjecture = new CollatzConjectureFast();
@@ -186,7 +159,7 @@
                 .size([Math.PI * 2, radius])
                 .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth)
                 (d3.hierarchy(data, d => {
-                    if (d.depth() < maxDepthRelative + collatzNode.depth() - Math.log(d.depth())) { // + collatzNodeAsRoot.depth()) {
+                    if (d.depth() < maxTreeDepthRelative + collatzNode.depth() - Math.log(d.depth())) { // + collatzNodeAsRoot.depth()) {
                         return d.children();
                     } else {
                         return null;
@@ -315,14 +288,14 @@
             console.log(root);      
             var node = root;
             var maxDepth = 0;
-            for (var i = 0; i < amount; i++) {
+            for (var i = 0; i < barChart_numHorizontalElements; i++) {
                 maxDepth = Math.max(node.depth(), maxDepth);
                 node = node.next();
             }
 
             // don't remove the +1, hacky reasons
             const squareHeight = height / (maxDepth + 1);
-            const squareWidth = width / amount;
+            const squareWidth = width / barChart_numHorizontalElements;
 
             d3.select("#barchart").remove();
             var svgContainer = d3.select("body").append("svg")
@@ -333,7 +306,7 @@
             node = root;
             var innernode = root;
 
-            for (var i = 0; i < amount; i++) {
+            for (var i = 0; i < barChart_numHorizontalElements; i++) {
                 innernode = node;
                 for (var j = 0; j <= node.depth(); j++) {
                     svgContainer.append("rect")
