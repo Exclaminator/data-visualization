@@ -209,11 +209,11 @@
             // update onclick and mouse events here.
             d3.select("#radial_tree").selectAll("circle")
             .on("mouseover", function(d) {
-                const nd = rootNodeCollatz.get(d.data.value());
+                const nd = d.data;
                 (highlight(nd, nd))();
             })
             .on("click", function(d) {
-                const nd = rootNodeCollatz.get(d.data.value());
+                const nd = d.data;
                 updateRoot(nd);
             });
 
