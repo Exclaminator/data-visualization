@@ -10,6 +10,7 @@
         <!-- <script src="./d3.v4.min.js"></script> -->
         <script src="./Collatz.js"></script>
         <script src="./ColorScheme.js"></script>
+        <script src="./breadcrumb.js"></script>
         
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         
@@ -19,7 +20,10 @@
 
     </head>
     <body>
-        <div>
+        <div class="row" style="max-height: 16%">
+        <svg id="breadcrumbs" class="col-md-3"></svg>
+        <h1 id="inspection" class="col-md-3">20</h1>
+        <div id="controlls" class="col-md-3">
             <form>
                 <!---
                     - Mode
@@ -42,29 +46,32 @@
                     <label for="colors-slider">Colors (= modulo)</label>
                     <input type="range" class="form-control-range" id="colors-slider" min="1" max="18" onchange="changeNumColors(this.value)">
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label for="treedepth-slider">Tree depth</label>
                     <input type="range" class="form-control-range" id="treedepth-slider" min="1" max="20" onmouseup="changeTreeDepth(this.value)">
                 </div>
                 <div class="form-group">
                     <label for="barchartwidth-slider">Barchart width (columns)</label>
                     <input type="range" class="form-control-range" id="barchartwidth-slider"  min="1" max="15">
-                </div>
+                </div> -->
             </form>
         </div>
-
-        <svg id="radial_tree"></svg>
-        <svg id="barchart"></svg>
+        <div id="legenda"  class="col-md-3"></div>
+        </div>
+        <div id="visrow" class="row">
+            <svg id="radial_tree" class="col-md-6"></svg>
+            <svg id="barchart" class="col-md-6"></svg>
+        </div>
     </body>
 
     <script>
         console.log(Date.now());
 
         let rootStack = [];
-        let maxTreeDepthRelative = 10;
+        let maxTreeDepthRelative = 15;
         var barChart_numHorizontalElements = 200;
 
-        const height = window.innerHeight;
+        const height = window.innerHeight*5/6;
         const width = window.innerWidth/2 - 50;
 
         const radius = width / 2 - 60;
@@ -77,12 +84,33 @@
 
         // init UI positions
         $("#colors-slider")[0].value = m;
-        $("#treedepth-slider")[0].value = maxTreeDepthRelative;
+        // $("#treedepth-slider")[0].value = maxTreeDepthRelative;
 
         let conjecture = new CollatzConjectureFast();
         let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
         let currentRoot = rootNodeCollatz;
         makeRadialTree(currentRoot);
+
+        breadcrumb = d3.breadcrumb()
+            .container('#breadcrumbs')   
+            .padding(5)
+            .wrapWidth(0)  // hint:  set 100 
+            .height(28)
+            .fontSize(14)
+            .marginLeft(0)
+            .marginTop(4)
+            .leftDirection(false);
+        // show breadcrumbs
+
+        function showBreadcrumbs() {
+            var objectstack = [];
+            for( var i = 0 ; i < rootStack.length; i++) {
+                objectstack[i] = {text: rootStack[i].value()};
+            }
+            objectstack[i] = {text: currentRoot.value()};
+            breadcrumb.show(objectstack);
+
+        }
 
         function changeNumColors(newNumColors) {
             colorScheme = new ModuloColorScheme(newNumColors);
@@ -111,6 +139,7 @@
 
             makeRadialTree(_root);
             barChart(_root);
+            showBreadcrumbs();
         }
 
         /**
@@ -129,6 +158,7 @@
                 currentRoot = newRoot;
             }
             barChart(currentRoot);
+            showBreadcrumbs();
         }
 
         function makeRadialTree(collatzNode) {
@@ -146,7 +176,7 @@
             const root = tree(collatzNode);
 
             d3.select("#radial_tree").remove();
-            d3.select("body")
+            d3.select("body").select("#visrow")
                 .insert("svg", "#barchart")
                 .attr("id", "radial_tree");
 
@@ -265,14 +295,14 @@
             }
 
             // don't remove the +1, hacky reasons
-            const squareHeight = height / (maxDepth + 1);
+            const squareHeight = (height-100) / (maxDepth + 1);
             const squareWidth = width / barChart_numHorizontalElements;
 
             d3.select("#barchart").remove();
-            var svgContainer = d3.select("body").append("svg")
+            var svgContainer = d3.select("#visrow").append("svg")
                 .attr("id", "barchart")
                 .attr("width", width)
-                .attr("height", height);
+                .attr("height", (height - 50));
             
             node = root;
             let innernode = root;
@@ -283,7 +313,7 @@
                     svgContainer.append("rect")
                         .attr("x", i*squareWidth)
                         //.attr("y", height - (j*squareHeight))     // inverted version
-                        .attr("y", height - (node.depth()+1)*squareHeight + (j*squareHeight))
+                        .attr("y", height - 50 - (node.depth()+1)*squareHeight + (j*squareHeight))
                         .attr("width", squareWidth)
                         .attr("height", squareHeight)
                         .attr("title", innernode.value())
