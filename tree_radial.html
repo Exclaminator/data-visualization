@@ -20,17 +20,16 @@
 
     </head>
     <body>
-<<<<<<< HEAD
         <div class="row" width="100%" >
             <svg id="breadcrumbs" class="col-md-12" style="height: 30px;"></svg>
         </div>
         <form>
             <div id="toolrow" class="row" style="height: 30px;">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <input class="form-check-input" type="checkbox" name="collatz-mode" id="gridRadios1" value="fast" checked>
-                            <label class="form-check-label" for="gridRadios1">Reduced Collatz map</label>
-                        </div>
+                    
+                <div class="form-group">
+                        <label for="exampleFormControlSelect2">Mode: </label>
+                        <input  type="button" class="form-button" name="fastCollatz" value="Redoced" onclick="location.href = location.toString().replace(location.search, '') + '?fast'"/>
+                        <input  type="button" class="form-button" name="defaultCollatz" value="Explicit" onclick="location.href = location.toString().replace(location.search, '')"/>
                     </div>
                     <div id="inspection" class="col-md-3">20</div>
                     <div id="controlls" class="col-md-3">
@@ -42,40 +41,6 @@
                 <svg id="legend" class="col-md-3"></svg>
             </div>
         </form>
-=======
-        <div class="row" style="max-height: 16%">
-        <svg id="breadcrumbs" class="col-md-3"></svg>
-        <h1 id="inspection" class="col-md-3">20</h1>
-        <div id="controlls" class="col-md-3">
-            <form>
-                <!---
-                    - Mode
-                    - Colors
-                    - Width bar chart (interact-drag barchart = nicer ux?)
-                    - Depth tree
-                -->
-                <div class="form-group">
-                    <label for="exampleFormControlSelect2">Collatz Conjecture mode: </label>
-                    <input  type="button" class="form-button" name="fastCollatz" value="Reload page with Fast Collatz Mode" onclick="location.href = location.toString().replace(location.search, '') + '?fast'"/>
-                    <input  type="button" class="form-button" name="defaultCollatz" value="Reload page with Default Collatz Mode" onclick="location.href = location.toString().replace(location.search, '')"/>
-                </div>
-                <div class="form-group">
-                    <label for="colors-slider">Colors (= modulo)</label>
-                    <input type="range" class="form-control-range" id="colors-slider" min="1" max="18" onchange="changeNumColors(this.value)">
-                </div>
-                <!-- <div class="form-group">
-                    <label for="treedepth-slider">Tree depth</label>
-                    <input type="range" class="form-control-range" id="treedepth-slider" min="1" max="20" onmouseup="changeTreeDepth(this.value)">
-                </div>
-                <div class="form-group">
-                    <label for="barchartwidth-slider">Barchart width (columns)</label>
-                    <input type="range" class="form-control-range" id="barchartwidth-slider"  min="1" max="15">
-                </div> -->
-            </form>
-        </div>
-        <div id="legenda"  class="col-md-3"></div>
-        </div>
->>>>>>> origin/control-panel-wip
         <div id="visrow" class="row">
             <svg id="radial_tree" class="col-md-6"></svg>
             <svg id="barchart" class="col-md-6"></svg>
@@ -158,23 +123,9 @@
         // goes wrong with updateing witht he first 10 elements?????
         //rootStack = [currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9)];
         function showBreadcrumbs() {
-<<<<<<< HEAD
-            var objectstack = [];
-            for( var i = 0 ; i < rootStack.length; i++) {
-                objectstack[i] = {
-                    text: rootStack[i].value(), 
-                    fill: colorScheme.forNumber(rootStack[i].value())
-                };
-            }
-            objectstack[i] = {
-                text: currentRoot.value(),
-                fill: colorScheme.forNumber(currentRoot.value())
-            };
-=======
             var objectstack = rootStack.concat(currentRoot).map(node => {
                 return {text: node.value()}
             });
->>>>>>> origin/control-panel-wip
             breadcrumb.show(objectstack);
         }
         showBreadcrumbs();
@@ -233,14 +184,11 @@
                 .attr("fill", d => (d.data.value() === currentRoot.value())? colorScheme.forRoot() : colorScheme.forNumber(d.data.value()));
 
             highlight();
-<<<<<<< HEAD
             // d3.select("#barchart").selectAll("rect")
             //     .attr("fill", (innernode.value() === currentRoot.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
             showBreadcrumbs();
             showLegend();
-=======
             barChart(currentRoot);
->>>>>>> origin/control-panel-wip
         }
 
         function changeTreeDepth(newTreeDepth) {
