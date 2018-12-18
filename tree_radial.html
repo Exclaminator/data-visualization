@@ -87,7 +87,7 @@
         barChart(currentRoot);
 
         function changeNumColors(newNumColors) {
-            colorScheme = new ModuloColorScheme(newNumColors);
+            colorScheme.changeModulo(parseInt(newNumColors));
             // redraw(currentRoot, barChart_numHorizontalElements, maxTreeDepthRelative);
 
             unlight();
