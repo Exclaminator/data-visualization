@@ -183,8 +183,8 @@
                 .attr("fill", d => (d === root)? colorScheme.forRoot() : colorScheme.forNumber(d.data.value()))
                 .attr("r", 7)
                 .attr("id", d => "circle" + d.data.value())
-                .attr("data-value", d => d.data.value())
-                .attr("data-root", root.data.value());
+                // .attr("data-value", d => d.data.value())
+                // .attr("data-root", root.data.value());
 
             function isEven(n) {
                 return !(n & 1);
