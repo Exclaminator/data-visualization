@@ -79,20 +79,23 @@
         $("#colors-slider")[0].value = m;
         $("#treedepth-slider")[0].value = maxTreeDepthRelative;
 
+        let conjecture = new CollatzConjectureFast();
+        let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
+        let currentRoot = rootNodeCollatz;
+        makeRadialTree(currentRoot);
+
         function changeNumColors(newNumColors) {
-            redraw(newNumColors, rootNodeCollatz, barChart_numHorizontalElements, maxTreeDepthRelative);
+            colorScheme = new ModuloColorScheme(newNumColors);
+            redraw(currentRoot, barChart_numHorizontalElements, maxTreeDepthRelative);
         }
 
         function changeTreeDepth(newTreeDepth) {
-            redraw(m, rootNodeCollatz, barChart_numHorizontalElements, newTreeDepth)
+            redraw(currentRoot, barChart_numHorizontalElements, newTreeDepth)
         }
 
         // TODO: add conjecture input
-        function redraw(_m, _root, _amount, _treeDepth) {
-
-            if (barChart_numHorizontalElements != _amount) {
-                barChart_numHorizontalElements = _amount;
-            }
+        function redraw(_root, _amount, _treeDepth) {
+            barChart_numHorizontalElements = _amount;
 
             if (maxTreeDepthRelative != _treeDepth) {
                 console.log(`new depth: ${_treeDepth}, old depth = ${maxTreeDepthRelative}`)
@@ -102,12 +105,6 @@
             barChart(_root);
             makeRadialTree(_root);
         }
-
-        let conjecture = new CollatzConjectureFast();
-        let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
-        let node = makeRadialTree(rootNodeCollatz);
-        let currentRoot = rootNodeCollatz;
-        
 
         /**
          *  @param newRoot The selected node, if same as current root will reset to previous root
