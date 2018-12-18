@@ -130,6 +130,7 @@
                 makeRadialTree(newRoot);
                 currentRoot = newRoot;
             }
+
             barChart(currentRoot);
         }
 
@@ -167,9 +168,9 @@
                 .attr("stroke-opacity", 0.4)
                 .attr("stroke-width", 1.5)
                 .selectAll("path")
-                .data(root.links())
-                .enter().append("path")
-                .attr("d", d3.linkRadial()
+                .data(root.links()).enter()
+                    .append("path")
+                    .attr("d", d3.linkRadial()
                     .angle(d => d.x)
                     .radius(d => d.y));
 
