@@ -87,9 +87,11 @@
         // $("#treedepth-slider")[0].value = maxTreeDepthRelative;
 
         let conjecture = new CollatzConjectureFast();
-        let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
-        let currentRoot = rootNodeCollatz;
+        let currentRoot = new CollatzNumberSimple(conjecture, 1);
+
+        // make the visualization
         makeRadialTree(currentRoot);
+        barChart(currentRoot);
 
         breadcrumb = d3.breadcrumb()
             .container('#breadcrumbs')   
@@ -113,15 +115,17 @@
         }
 
         function changeNumColors(newNumColors) {
-            colorScheme = new ModuloColorScheme(newNumColors);
+            colorScheme.changeModulo(parseInt(newNumColors));
             // redraw(currentRoot, barChart_numHorizontalElements, maxTreeDepthRelative);
 
             unlight();
-            d3.select("#radial_tree").selectAll("circle")
+            d3.select("#radial_tree")
+                .selectAll("circle")
                 .attr("fill", d => (d.data.value() === currentRoot.value())? colorScheme.forRoot() : colorScheme.forNumber(d.data.value()));
 
-            d3.select("#barchart").selectAll("rect")
-                .attr("fill", (innernode.value() === currentRoot.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
+            highlight();
+            // d3.select("#barchart").selectAll("rect")
+            //     .attr("fill", (innernode.value() === currentRoot.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
         }
 
         function changeTreeDepth(newTreeDepth) {
@@ -213,8 +217,8 @@
                 .attr("fill", d => (d === root)? colorScheme.forRoot() : colorScheme.forNumber(d.data.value()))
                 .attr("r", 7)
                 .attr("id", d => "circle" + d.data.value())
-                .attr("data-value", d => d.data.value())
-                .attr("data-root", root.data.value());
+                // .attr("data-value", d => d.data.value())
+                // .attr("data-root", root.data.value());
 
             function isEven(n) {
                 return !(n & 1);
@@ -260,19 +264,32 @@
         * @param innernode "the element in the column you're hovering over"
         */
         function highlight(node, innernode) {
+
+            // save what is going to be highlighted
+            if (node){
+                this.highlighted = node;
+            }
+
+            // nothing highlighted, so nothing to do
+            if (this.highlighted === undefined) {
+                return;
+            }
+
+
+            // handle missing innernode arg (highlight node in tree and whole bar in barchart)
+            if (!innernode) {
+                innernode = this.highlighted;
+            }
+
             // sticky-highlighting: unlight everything only on new highlight command
             unlight();
 
-            if (!innernode) {
-                innernode = node;
-            }
+            let nd = this.highlighted;
+            for (var i = 0; i <= this.highlighted.depth(); i++) {
+                let color = nd.value() === innernode.value() ? colorScheme.forSpecial(0) : colorScheme.forSpecial(1);
 
-            let nd = node;
-            for (var i = 0; i <= node.depth(); i++) {
-                d3.select("#radial_tree").select("#circle"+nd.value())
-                    .style("stroke", (nd.value() === innernode.value() ? colorScheme.forSpecial() : colorScheme.forSpecial(1)));
-                d3.select("#barchart").selectAll(".bar"+nd.value())
-                    .style("stroke", (nd.value() === innernode.value() ? colorScheme.forSpecial() : colorScheme.forSpecial(1)));
+                d3.select("#radial_tree").select("#circle"+nd.value()).style("stroke", color);
+                d3.select("#barchart").selectAll(".bar"+nd.value()).style("stroke", color);
                 nd = nd.parent();
             }
         }
@@ -326,7 +343,6 @@
                 node = node.next();
             }
         }
-        barChart(currentRoot);
     </script>
 
 </html>

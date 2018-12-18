@@ -1,7 +1,6 @@
 class ModuloColorScheme {
     constructor(modulo) {
-        this.modulo = modulo;
-        this.colorScheme = [
+        this.colors = [
             "#1f77b4",
             "#aec7e8",
             "#ff7f0e",
@@ -23,12 +22,16 @@ class ModuloColorScheme {
             "#17becf",
             "#9edae5"
         ];
-        if (this.modulo - 1 > this.colorScheme.length) {
-            throw new Error(`ModuloColorScheme does not have enough colors to handle a modulo of this size. Available: ${this.colorScheme.length}, given modulo: ${this.modulo}`);
+        this.changeModulo(modulo);
+    }
+    changeModulo(newModulo) {
+        if (newModulo - 1 > this.colors.length) {
+            throw new Error(`ModuloColorScheme does not have enough colors to handle a modulo of this size. Available: ${this.colors.length}, given modulo: ${this.modulo}`);
         }
+        this.modulo = newModulo;
     }
     forNumber(value) {
-        return this.colorScheme[value % this.modulo];
+        return this.colors[value % this.modulo];
     }
     forHighlight() {
         return this.forSpecial();
@@ -37,9 +40,9 @@ class ModuloColorScheme {
         return "#000000";
     }
     forSpecial(offset) {
-        if (!offset) {
+        if (offset === undefined) {
             offset = 0;
         }
-        return this.colorScheme[this.modulo + offset];
+        return this.colors[this.modulo + offset];
     }
 }

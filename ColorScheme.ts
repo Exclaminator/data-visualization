@@ -5,7 +5,8 @@ interface ColorScheme {
 }
 
 class ModuloColorScheme implements ColorScheme {
-    private readonly colorScheme = [
+    private modulo: number;
+    private readonly colors = [
         "#1f77b4",
         "#aec7e8",
         "#ff7f0e",
@@ -28,14 +29,19 @@ class ModuloColorScheme implements ColorScheme {
         "#9edae5"
     ];
 
-    constructor(private readonly modulo: number) {
-        if (this.modulo - 1 > this.colorScheme.length) {
-            throw new Error(`ModuloColorScheme does not have enough colors to handle a modulo of this size. Available: ${this.colorScheme.length}, given modulo: ${this.modulo}`);
+    constructor(modulo: number) {
+        this.changeModulo(modulo);
+    }
+
+    changeModulo(newModulo: number) {
+        if (newModulo - 1 > this.colors.length) {
+            throw new Error(`ModuloColorScheme does not have enough colors to handle a modulo of this size. Available: ${this.colors.length}, given modulo: ${this.modulo}`);
         }
+        this.modulo = newModulo;
     }
 
     forNumber(value: number): string {
-        return this.colorScheme[value % this.modulo];
+        return this.colors[value % this.modulo];
     }
 
     forHighlight(): string {
@@ -46,13 +52,11 @@ class ModuloColorScheme implements ColorScheme {
         return "#000000";
     }
 
-
-
     forSpecial(offset?: number): string {
-        if (!offset) {
+        if (offset === undefined) {
             offset = 0;
         }
 
-        return this.colorScheme[this.modulo + offset];
+        return this.colors[this.modulo + offset];
     }
 }
