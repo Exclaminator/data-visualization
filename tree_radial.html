@@ -127,7 +127,7 @@
         function makeRadialTree(collatzNode) {
             let tree = data => d3.tree()
                 .size([Math.PI * 2, radius])
-                .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth)
+                .separation((a, b) => (a.parent.name === b.parent.name ? 1 : 2) / a.depth)
                 (d3.hierarchy(data, d => {
                     if (d.depth() < maxTreeDepthRelative + collatzNode.depth() - Math.log(d.depth())) { // + collatzNodeAsRoot.depth()) {
                         return d.children();
@@ -173,7 +173,7 @@
                 .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
             
             node.append("circle")
-                .attr("fill", d => (d == root)? colorScheme.forSpecial(1) : colorScheme.forNumber(d.data.value()))
+                .attr("fill", d => (d === root)? colorScheme.forSpecial(1) : colorScheme.forNumber(d.data.value()))
                 .attr("r", 7)
                 .attr("id", d => "circle" + d.data.value())
                 .attr("data-value", d => d.data.value())
