@@ -11,9 +11,10 @@
         <script src="./Collatz.js"></script>
         <script src="./ColorScheme.js"></script>
         <script src="./breadcrumb.js"></script>
+        <script src="./d3.slider.js"></script>
         
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-        
+        <link rel="stylesheet" href="./d3.slider.css" />
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
@@ -32,13 +33,12 @@
                         <input  type="button" class="form-button" name="defaultCollatz" value="Explicit" onclick="location.href = location.toString().replace(location.search, '')"/>
                     </div>
                     <div id="inspection" class="col-md-3">20</div>
-                    <div id="controlls" class="col-md-3">
-                        <div class="form-group">
+                        <!-- <div class="form-group">
                             <label for="colors-slider">Colors (= modulo)</label>
                             <input type="range" class="form-control-range" id="colors-slider" min="1" max="18" onchange="changeNumColors(this.value)">
-                        </div>  
+                        </div>   -->
                     </div>
-                <svg id="legend" class="col-md-3"></svg>
+                <svg id="legend" class="col-md-6"></svg>
             </div>
         </form>
         <div id="visrow" class="row">
@@ -94,7 +94,7 @@
         let colorScheme = new ModuloColorScheme(m);
 
         // init UI positions
-        $("#colors-slider")[0].value = m;
+        //$("#colors-slider")[0].value = m;
         // $("#treedepth-slider")[0].value = maxTreeDepthRelative;
 
 
@@ -104,7 +104,7 @@
             : new CollatzConjectureDefault();
 
         let currentRoot = new CollatzNumberSimple(conjecture, 1);
-
+        
         // make the visualization
         makeRadialTree(currentRoot);
         barChart(currentRoot);
@@ -121,10 +121,10 @@
         // show breadcrumbs
         
         // goes wrong with updateing witht he first 10 elements?????
-        //rootStack = [currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9)];
+        rootStack = [currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9)];
         function showBreadcrumbs() {
             var objectstack = rootStack.concat(currentRoot).map(node => {
-                return {text: node.value()}
+                return {text: node.value(), fill: colorScheme.forNumber(node.value())};
             });
             breadcrumb.show(objectstack);
         }
@@ -136,14 +136,16 @@
             d3.select("body").select("#toolrow")
                 .append("svg")
                 .attr("id", "legend")
-                .attr("class", "col-md-3");
+                .attr("class", "col-md-6");
 
             const svg = d3.select("#legend");
-            var fw = parseInt(svg.style("width"))-20;
+            var fw = parseInt(svg.style("width"));
             var fh = parseInt(svg.style("height"));
             const shemeObjects = colorScheme.getSchemeObjects();
-            const m = shemeObjects.length
-            const dx = fw / m;
+            const t = shemeObjects.length
+            const m = colorScheme.getModulo();
+            const dx = fw / t;
+            
             
             var block = svg.selectAll("g").data(shemeObjects).enter().append("g")
                  .attr("transform", function(d, i) { return "translate(" + i * dx + ", 0)"; });
@@ -151,7 +153,7 @@
             block.append("rect")
                 .attr("width", dx)
                 .attr("height", 30)
-                .attr("fill", d => d.fill);
+                .attr("fill", (d,i) => colorScheme.forNumber(i));
 
             block.append("text")
                 .attr("x", Math.max(0, dx/2 - Math.min(15, m)))
@@ -159,6 +161,53 @@
                 .attr("dy", ".35em")
                 .attr("fill", "white")
                 .text(function(d) { return d.value; });
+            
+
+            svg.append("rect")
+                .datum([{value: "bloep"}])
+                .attr("x", fw*m/t + dx/2)
+                .attr("y", 0)
+                .attr("width", 5)
+                .attr("height", 30)
+                .attr("r", 5)
+                .attr("id", "slider")
+                .attr("cursor", "ew-resize")
+                .style("fill", "white")
+                .style("stroke", "black")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            function dragstarted(d) {
+                d3.select("#slider").raise().classed("active", true);
+            }
+
+            function dragged(d) {
+                d3.select("#slider").attr("x", d.x = Math.max(0, Math.min(d3.event.x, 19*dx)));
+                console.log(Math.floor(d3.event.x/dx));
+                var m = Math.floor(d3.event.x/dx);
+                colorScheme.changeModulo(m);
+                block.select("rect").attr("fill", (d, i) => { return colorScheme.forNumber(i)});
+            }
+
+            function dragended(d) {
+                d3.select("#slider").classed("active", false);
+                var m = Math.floor(d3.event.x/dx);
+                // d3.select("#slider").attr("x", d.x = Math.max(0, Math.min(m*dx, 19*dx)));
+                changeNumColors(m);
+            }
+
+            // var drag = d3.behavior.drag()
+            //     .origin(function(d) { return d; })
+            //     .on("drag", dragmove);
+            // var circle = svg.append("circle")
+            //     .attr("r", radius)
+            //     .attr("cy", function(d) { return d.y; })
+            //     .attr("cx", function(d) { return d.x; })
+            //     .style("cursor", "ew-resize")
+            //     .call(drag);
+        
 
             // for (var i = 0; i < m; i++) {
             //     g.append("rect")
@@ -187,7 +236,7 @@
             // d3.select("#barchart").selectAll("rect")
             //     .attr("fill", (innernode.value() === currentRoot.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
             showBreadcrumbs();
-            showLegend();
+            //showLegend();
             barChart(currentRoot);
         }
 

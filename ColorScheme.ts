@@ -3,6 +3,7 @@ interface ColorScheme {
     forRoot(): string;
     forHighlight(): string;
     getSchemeObjects();
+    getModulo();
 }
 
 class ModuloColorScheme implements ColorScheme {
@@ -34,12 +35,16 @@ class ModuloColorScheme implements ColorScheme {
         this.changeModulo(modulo);
     }
     
+    getModulo() {
+        return this.modulo;
+    }
+
     getSchemeObjects() {
         var objectstack = [];
-        for(var i = 0; i < this.modulo; i++) {
+        for(var i = 0; i < this.colors.length; i++) {
             objectstack[i] = {
                 value: i,
-                fill: this.forNumber(i)
+                fill: this.colors[i]
             };
         }
         return objectstack;
