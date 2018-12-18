@@ -80,9 +80,11 @@
         $("#treedepth-slider")[0].value = maxTreeDepthRelative;
 
         let conjecture = new CollatzConjectureFast();
-        let rootNodeCollatz = new CollatzNumberSimple(conjecture, 1);
-        let currentRoot = rootNodeCollatz;
+        let currentRoot = new CollatzNumberSimple(conjecture, 1);
+
+        // make the visualization
         makeRadialTree(currentRoot);
+        barChart(currentRoot);
 
         function changeNumColors(newNumColors) {
             colorScheme = new ModuloColorScheme(newNumColors);
@@ -296,7 +298,6 @@
                 node = node.next();
             }
         }
-        barChart(currentRoot);
     </script>
 
 </html>
