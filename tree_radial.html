@@ -96,8 +96,7 @@
                 .attr("fill", d => (d.data.value() === currentRoot.value())? colorScheme.forRoot() : colorScheme.forNumber(d.data.value()));
 
             highlight();
-            // d3.select("#barchart").selectAll("rect")
-            //     .attr("fill", (innernode.value() === currentRoot.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
+            barChart(currentRoot);
         }
 
         function changeTreeDepth(newTreeDepth) {
