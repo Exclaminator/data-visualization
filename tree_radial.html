@@ -109,8 +109,8 @@
                 maxTreeDepthRelative = _treeDepth;
             }
 
-            barChart(_root);
             makeRadialTree(_root);
+            barChart(_root);
         }
 
         /**
@@ -212,7 +212,6 @@
                 .attr("height", height)
                 .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
                 
-            
             // update onclick and mouse events here.
             d3.select("#radial_tree").selectAll("circle")
                 .on("mouseover", d => highlight(d.data))
