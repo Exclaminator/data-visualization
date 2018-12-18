@@ -91,11 +91,13 @@
             // redraw(currentRoot, barChart_numHorizontalElements, maxTreeDepthRelative);
 
             unlight();
-            d3.select("#radial_tree").selectAll("circle")
+            d3.select("#radial_tree")
+                .selectAll("circle")
                 .attr("fill", d => (d.data.value() === currentRoot.value())? colorScheme.forRoot() : colorScheme.forNumber(d.data.value()));
 
-            d3.select("#barchart").selectAll("rect")
-                .attr("fill", (innernode.value() === currentRoot.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
+            highlight();
+            // d3.select("#barchart").selectAll("rect")
+            //     .attr("fill", (innernode.value() === currentRoot.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
         }
 
         function changeTreeDepth(newTreeDepth) {
