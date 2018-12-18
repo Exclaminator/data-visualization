@@ -114,15 +114,14 @@
             if (rootStack.length > 0 && newRoot === currentRoot) {
                 // clicked on root
                 const nod = rootStack.pop();
-                currentRoot = makeRadialTree(nod);
-                barChart(nod);
+                makeRadialTree(nod);
                 currentRoot = nod;
             } else {
                 rootStack.push(currentRoot);
-                currentRoot = makeRadialTree(newRoot);
-                barChart(newRoot);
+                makeRadialTree(newRoot);
                 currentRoot = newRoot;
             }
+            barChart(currentRoot);
         }
 
         function makeRadialTree(collatzNode) {
