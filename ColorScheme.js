@@ -30,6 +30,12 @@ class ModuloColorScheme {
     forNumber(value) {
         return this.colorScheme[value % this.modulo];
     }
+    forHighlight() {
+        return this.forSpecial();
+    }
+    forRoot() {
+        return "#000000";
+    }
     forSpecial(offset) {
         if (!offset) {
             offset = 0;

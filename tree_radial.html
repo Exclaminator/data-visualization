@@ -173,7 +173,7 @@
                 .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
             
             node.append("circle")
-                .attr("fill", d => (d === root)? colorScheme.forSpecial(1) : colorScheme.forNumber(d.data.value()))
+                .attr("fill", d => (d === root)? colorScheme.forRoot() : colorScheme.forNumber(d.data.value()))
                 .attr("r", 7)
                 .attr("id", d => "circle" + d.data.value())
                 .attr("data-value", d => d.data.value())
@@ -236,9 +236,9 @@
                 var nd = node;
                 for (var i = 0; i <= node.depth(); i++) {
                     d3.select("#radial_tree").select("#circle"+nd.value())
-                        .style("stroke", (nd.value() == innernode.value() ? colorScheme.forSpecial() : colorScheme.forSpecial(1)));
+                        .style("stroke", (nd.value() === innernode.value() ? colorScheme.forSpecial() : colorScheme.forSpecial(1)));
                     d3.select("#barchart").selectAll(".bar"+nd.value())
-                        .style("stroke", (nd.value() == innernode.value() ? colorScheme.forSpecial() : colorScheme.forSpecial(1)));
+                        .style("stroke", (nd.value() === innernode.value() ? colorScheme.forSpecial() : colorScheme.forSpecial(1)));
                     nd = nd.parent();
                 }
             }
@@ -293,13 +293,13 @@
                                 updateRoot(innernode);
                             }
                         })(innernode))
-                        .attr("fill", (innernode.value() == root.value()) ? colorScheme.forSpecial(1) : colorScheme.forNumber(innernode.value()));
+                        .attr("fill", (innernode.value() === root.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
                     innernode = innernode.parent();
                 }
                 node = node.next();
             }
         }
-        barChart(rootNodeCollatz);
+        barChart(currentRoot);
     </script>
 
 </html>

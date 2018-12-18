@@ -1,6 +1,7 @@
 interface ColorScheme {
     forNumber(value: number): string;
-    forSpecial(): string;
+    forRoot(): string;
+    forHighlight(): string;
 }
 
 class ModuloColorScheme implements ColorScheme {
@@ -36,6 +37,16 @@ class ModuloColorScheme implements ColorScheme {
     forNumber(value: number): string {
         return this.colorScheme[value % this.modulo];
     }
+
+    forHighlight(): string {
+        return this.forSpecial();
+    }
+
+    forRoot(): string {
+        return "#000000";
+    }
+
+
 
     forSpecial(offset?: number): string {
         if (!offset) {
