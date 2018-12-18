@@ -24,6 +24,16 @@ class ModuloColorScheme {
         ];
         this.changeModulo(modulo);
     }
+    getSchemeObjects() {
+        var objectstack = [];
+        for (var i = 0; i < this.modulo; i++) {
+            objectstack[i] = {
+                value: i,
+                fill: this.forNumber(i)
+            };
+        }
+        return objectstack;
+    }
     changeModulo(newModulo) {
         if (newModulo - 1 > this.colors.length) {
             throw new Error(`ModuloColorScheme does not have enough colors to handle a modulo of this size. Available: ${this.colors.length}, given modulo: ${this.modulo}`);

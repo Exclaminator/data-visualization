@@ -20,49 +20,60 @@
 
     </head>
     <body>
-        <div class="row" style="max-height: 16%">
-        <svg id="breadcrumbs" class="col-md-3"></svg>
-        <h1 id="inspection" class="col-md-3">20</h1>
-        <div id="controlls" class="col-md-3">
-            <form>
-                <!---
-                    - Mode
-                    - Colors
-                    - Width bar chart (interact-drag barchart = nicer ux?)
-                    - Depth tree
-                -->
-                <div class="form-group">
-                    <label for="exampleFormControlSelect2">Collatz Conjecture mode</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="collatz-mode" id="gridRadios1" value="fast" checked>
-                        <label class="form-check-label" for="gridRadios1">Fast Collatz (skip trivial even numbered steps)</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="collatz-mode" id="gridRadios2" value="normal">
-                        <label class="form-check-label" for="gridRadios2">Default Collatz</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="colors-slider">Colors (= modulo)</label>
-                    <input type="range" class="form-control-range" id="colors-slider" min="1" max="18" onchange="changeNumColors(this.value)">
-                </div>
-                <!-- <div class="form-group">
-                    <label for="treedepth-slider">Tree depth</label>
-                    <input type="range" class="form-control-range" id="treedepth-slider" min="1" max="20" onmouseup="changeTreeDepth(this.value)">
-                </div>
-                <div class="form-group">
-                    <label for="barchartwidth-slider">Barchart width (columns)</label>
-                    <input type="range" class="form-control-range" id="barchartwidth-slider"  min="1" max="15">
-                </div> -->
-            </form>
+        <div class="row" width="100%" >
+            <svg id="breadcrumbs" class="col-md-12" style="height: 30px;"></svg>
         </div>
-        <div id="legenda"  class="col-md-3"></div>
-        </div>
+        <form>
+            <div id="toolrow" class="row" style="height: 30px;">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <input class="form-check-input" type="checkbox" name="collatz-mode" id="gridRadios1" value="fast" checked>
+                            <label class="form-check-label" for="gridRadios1">Reduced Collatz map</label>
+                        </div>
+                    </div>
+                    <div id="inspection" class="col-md-3">20</div>
+                    <div id="controlls" class="col-md-3">
+                        <div class="form-group">
+                            <label for="colors-slider">Colors (= modulo)</label>
+                            <input type="range" class="form-control-range" id="colors-slider" min="1" max="18" onchange="changeNumColors(this.value)">
+                        </div>  
+                    </div>
+                <svg id="legend" class="col-md-3"></svg>
+            </div>
+        </form>
         <div id="visrow" class="row">
             <svg id="radial_tree" class="col-md-6"></svg>
             <svg id="barchart" class="col-md-6"></svg>
         </div>
     </body>
+
+
+    
+                    <!---
+                        - Mode
+                        - Colors
+                        - Width bar chart (interact-drag barchart = nicer ux?)
+                        - Depth tree
+                    -->
+                    <!-- <div class="form-group">
+                        <label for="exampleFormControlSelect2">Collatz Conjecture mode</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="collatz-mode" id="gridRadios1" value="fast" checked>
+                            <label class="form-check-label" for="gridRadios1">Fast Collatz (skip trivial even numbered steps)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="collatz-mode" id="gridRadios2" value="normal">
+                            <label class="form-check-label" for="gridRadios2">Default Collatz</label>
+                        </div>
+                    </div> -->
+                    <!-- <div class="form-group">
+                        <label for="treedepth-slider">Tree depth</label>
+                        <input type="range" class="form-control-range" id="treedepth-slider" min="1" max="20" onmouseup="changeTreeDepth(this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label for="barchartwidth-slider">Barchart width (columns)</label>
+                        <input type="range" class="form-control-range" id="barchartwidth-slider"  min="1" max="15">
+                    </div> -->
 
     <script>
         console.log(Date.now());
@@ -96,23 +107,77 @@
         breadcrumb = d3.breadcrumb()
             .container('#breadcrumbs')   
             .padding(5)
-            .wrapWidth(0)  // hint:  set 100 
+            .wrapWidth(window.innerWidth)  // hint:  set 100 
             .height(28)
             .fontSize(14)
             .marginLeft(0)
             .marginTop(4)
             .leftDirection(false);
         // show breadcrumbs
-
+        
+        // goes wrong with updateing witht he first 10 elements?????
+        //rootStack = [currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9)];
         function showBreadcrumbs() {
             var objectstack = [];
             for( var i = 0 ; i < rootStack.length; i++) {
-                objectstack[i] = {text: rootStack[i].value()};
+                objectstack[i] = {
+                    text: rootStack[i].value(), 
+                    fill: colorScheme.forNumber(rootStack[i].value())
+                };
             }
-            objectstack[i] = {text: currentRoot.value()};
+            objectstack[i] = {
+                text: currentRoot.value(),
+                fill: colorScheme.forNumber(currentRoot.value())
+            };
             breadcrumb.show(objectstack);
 
         }
+        showBreadcrumbs();
+        
+        function showLegend() {
+            
+            d3.select("#legend").remove();
+            d3.select("body").select("#toolrow")
+                .append("svg")
+                .attr("id", "legend")
+                .attr("class", "col-md-3");
+
+            const svg = d3.select("#legend");
+            var fw = parseInt(svg.style("width"))-20;
+            var fh = parseInt(svg.style("height"));
+            const shemeObjects = colorScheme.getSchemeObjects();
+            const m = shemeObjects.length
+            const dx = fw / m;
+            
+            var block = svg.selectAll("g").data(shemeObjects).enter().append("g")
+                 .attr("transform", function(d, i) { return "translate(" + i * dx + ", 0)"; });
+
+            block.append("rect")
+                .attr("width", dx)
+                .attr("height", 30)
+                .attr("fill", d => d.fill);
+
+            block.append("text")
+                .attr("x", Math.max(0, dx/2 - Math.min(15, m)))
+                .attr("y", 30 / 2)
+                .attr("dy", ".35em")
+                .attr("fill", "white")
+                .text(function(d) { return d.value; });
+
+            // for (var i = 0; i < m; i++) {
+            //     g.append("rect")
+            //         .attr("x", i*dx)
+            //         .attr("y", 0)
+            //         .attr("width", dx)
+            //         .attr("height", 30)
+            //         // .attr("title", innernode.value())
+            //         // .attr("class", "bar"+innernode.value() + " cBar"+node.value())
+            //         // .on("mouseover", (innernode => () => highlight(node, innernode))(innernode))
+            //         // .on("click", (innernode => () => updateRoot(innernode))(innernode))
+            //         .attr("fill", colorScheme.forNumber(i));
+            // }
+        }
+        showLegend();
 
         function changeNumColors(newNumColors) {
             colorScheme.changeModulo(parseInt(newNumColors));
@@ -126,6 +191,8 @@
             highlight();
             // d3.select("#barchart").selectAll("rect")
             //     .attr("fill", (innernode.value() === currentRoot.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
+            showBreadcrumbs();
+            showLegend();
         }
 
         function changeTreeDepth(newTreeDepth) {
