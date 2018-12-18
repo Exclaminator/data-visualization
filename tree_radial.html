@@ -104,18 +104,14 @@
         // show breadcrumbs
 
         function showBreadcrumbs() {
-            var objectstack = [];
-            for( var i = 0 ; i < rootStack.length; i++) {
-                objectstack[i] = {text: rootStack[i].value()};
-            }
-            objectstack[i] = {text: currentRoot.value()};
+            var objectstack = rootStack.concat(currentRoot).map(node => {
+                return {text: node.value()}
+            });
             breadcrumb.show(objectstack);
-
         }
 
         function changeNumColors(newNumColors) {
             colorScheme.changeModulo(parseInt(newNumColors));
-            // redraw(currentRoot, barChart_numHorizontalElements, maxTreeDepthRelative);
 
             unlight();
             d3.select("#radial_tree")
