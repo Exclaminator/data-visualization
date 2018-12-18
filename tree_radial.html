@@ -21,7 +21,7 @@
 
     </head>
     <body>
-        <div class="row" width="100%" >
+        <div id="breadrow" class="row" width="100%" >
             <svg id="breadcrumbs" class="col-md-12" style="height: 30px;"></svg>
         </div>
         <form>
@@ -109,20 +109,28 @@
         makeRadialTree(currentRoot);
         barChart(currentRoot);
 
-        breadcrumb = d3.breadcrumb()
-            .container('#breadcrumbs')   
-            .padding(5)
-            .wrapWidth(window.innerWidth)  // hint:  set 100 
-            .height(28)
-            .fontSize(14)
-            .marginLeft(0)
-            .marginTop(4)
-            .leftDirection(false);
+        
         // show breadcrumbs
         
         // goes wrong with updateing witht he first 10 elements?????
-        rootStack = [currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9)];
+        //rootStack = [currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9)];
         function showBreadcrumbs() {
+            d3.select("#breadcrumbs").remove();
+            d3.select("#breadrow").append("svg")
+                .attr("id", "breadcrumbs")
+                .attr("class", "col-md-12")
+                .attr("style", "height: 30px;");
+
+            breadcrumb = d3.breadcrumb()
+                .container('#breadcrumbs')   
+                .padding(5)
+                .wrapWidth(window.innerWidth)  // hint:  set 100 
+                .height(28)
+                .fontSize(14)
+                .marginLeft(0)
+                .marginTop(4)
+                .leftDirection(false);
+
             var objectstack = rootStack.concat(currentRoot).map(node => {
                 return {text: node.value(), fill: colorScheme.forNumber(node.value())};
             });
