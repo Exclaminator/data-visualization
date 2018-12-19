@@ -26,14 +26,17 @@
     <div class="container-fluid" style="width: 100%">
         <form>
             <div id="toolrow" class="row nopadding" style="height: 30px;">
-                <div class="form-group col-md-3">
+                <div class="form-group col-md-2">
                     <label for="exampleFormControlSelect2">mode: </label>
-                    <input  type="button" class="form-button" name="fastCollatz" value="Reduced" onclick="location.href = location.toString().replace(location.search, '') + '?fast'"/>
-                    <input  type="button" class="form-button" name="defaultCollatz" value="Explicit" onclick="location.href = location.toString().replace(location.search, '')"/>
-                    <input  type="number" id="rootSelector" name="selectedRoot" />
-                    <input  type="button" class="form-button" name="setRoot" value="Set as Root" onclick="updateRootToGiven()"/>
+                    <input  type="button" class="form-button" name="fastCollatz" value="reduced" onclick="location.href = location.toString().replace(location.search, '') + '?fast'"/>
+                    <input  type="button" class="form-button" name="defaultCollatz" value="explicit" onclick="location.href = location.toString().replace(location.search, '')"/>
                 </div>
-                <svg id="inspection" class="col-md-3"></svg>
+                <div class="form-group col-md-2">
+                    <label for="selectedRoot">root: </label>
+                    <input  type="number" id="rootSelector" name="selectedRoot" />
+                    <input  type="button" class="form-button" name="setRoot" value="set" onclick="updateRootToGiven()"/>
+                </div>
+                <svg id="inspection" class="col-md-2"></svg>
                 <svg id="legend" class="col-md-6 nopadding"></svg>
             </div>
         </form>
@@ -92,6 +95,7 @@
             showBreadcrumbs();
             barChart(currentRoot);
             showStem(currentRoot);
+            inspect(currentRoot);
         }
         
         function updateRootToGiven() {
@@ -127,7 +131,9 @@
             makeRadialTree(_root);
             barChart(_root);
             showBreadcrumbs();
-            showStem(currentRoot);
+            showStem(_root);
+            inspect(_root);
+            showLegend(colorScheme);
         }
 
         /**
@@ -149,6 +155,7 @@
             barChart(currentRoot);
             showBreadcrumbs();
             showStem(currentRoot);
+            inspect(currentRoot);
         }
 
         function makeRadialTree(collatzNode) {
@@ -300,14 +307,18 @@
         function barChart(root) {
             let node = root;
             let maxDepth = 0;
+            let maxDepthNode = 0;
             for (let i = 0; i < barChart_numHorizontalElements; i++) {
                 maxDepth = Math.max(node.depth(), maxDepth);
+                if (node.depth() == maxDepth) {
+                    maxDepthNode = node.value();
+                }
                 node = node.next();
             }
 
             const svg = d3.select("#barchart");
             const height = parseInt(svg.style("height"));
-            const width = parseInt(svg.style("width"));
+            const width = parseInt(svg.style("width"))-8;
 
             // don't remove the +1, hacky reasons
             const squareHeight = (height-100) / (maxDepth + 1);
@@ -317,8 +328,27 @@
             var svgContainer = d3.select("#visrow").append("svg")
                 .attr("id", "barchart")
                 .attr("class", "col-md-7");
+            
+            function drawbox(x, value) {
+                svgContainer.select(".hinbox").remove();
 
-                
+                var box = svgContainer.append("g")
+                    .attr("class", "hinbox")
+                    .attr("transform", "translate("+ (x-0.5)*squareWidth +", "+ (height - 50) +")");
+
+                // box.append("rect")
+                //     .attr("width", 100)
+                //     .attr("height", 30)
+                //     .attr("fill", "pink");
+
+                box.append("text")
+                    .attr("x", 0)
+                    .attr("y", 15)
+                    .attr("dy", ".35em")
+                    .attr("fill", "black")
+                    .text(value);
+            }
+            drawbox(maxDepthNode);
             
             node = root;
             let innernode = root;
@@ -334,7 +364,7 @@
                         .attr("height", squareHeight)
                         .attr("title", innernode.value())
                         .attr("class", "bar"+innernode.value() + " cBar"+node.value())
-                        .on("mouseover", ((innernode, node) => () => highlight(node, innernode))(innernode, node))
+                        .on("mouseover", ((innernode, node) => () => { highlight(node, innernode); drawbox(node.value() - root.value(), node.value()) })(innernode, node))
                         .on("click", (innernode => () => updateRoot(innernode))(innernode))
                         .attr("fill", (innernode.value() === root.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
                     innernode = innernode.parent();
