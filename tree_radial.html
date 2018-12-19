@@ -13,6 +13,7 @@
         <script src="src/d3/breadcrumb.js"></script>
         <script src="src/inspect.js"></script>
         <script src="src/rootbreadcrumb.js"></script>
+        <script src="src/rootstem.js"></script>
         <script src="./d3.slider.js"></script>
         
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
@@ -109,34 +110,6 @@
         //rootStack = [currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9)];
 
         showBreadcrumbs();
-        
-        function showStem(root) {
-            d3.select("#stemcrumbs").remove();
-            d3.select("#stemrow").append("svg")
-                .attr("id", "stemcrumbs")
-                .attr("class", "col-md-12");
-
-            stemcrumbs = d3.breadcrumb()
-                .container('#stemcrumbs')   
-                .padding(5)
-                .wrapWidth(window.innerWidth-100)  // hint:  set 100 
-                .height(28)
-                .fontSize(14)
-                .marginLeft(0)
-                .marginTop(4)
-                .leftDirection(false);
-
-            let objectstack = [];
-            let node = root;
-            for(let i = 0; i <= root.depth(); i++) {
-                objectstack[i] = {
-                    text: node.value(), 
-                    fill: colorScheme.forNumber(node.value())
-                };
-                node = node.parent();
-            }
-            stemcrumbs.show(objectstack);
-        }
         showStem(currentRoot); 
 
 
