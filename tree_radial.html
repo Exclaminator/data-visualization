@@ -10,8 +10,9 @@
         <!-- <script src="./d3.v4.min.js"></script> -->
         <script src="./Collatz.js"></script>
         <script src="./ColorScheme.js"></script>
-        <script src="./breadcrumb.js"></script>
+        <script src="src/d3/breadcrumb.js"></script>
         <script src="src/inspect.js"></script>
+        <script src="src/rootbreadcrumb.js"></script>
         <script src="./d3.slider.js"></script>
         
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
@@ -106,28 +107,7 @@
         
         // goes wrong with updateing witht he first 10 elements?????
         //rootStack = [currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9), currentRoot.get(1), currentRoot.get(2), currentRoot.get(3), currentRoot.get(4), currentRoot.get(5), currentRoot.get(6), currentRoot.get(7), currentRoot.get(8), currentRoot.get(9)];
-        function showBreadcrumbs() {
-            d3.select("#breadcrumbs").remove();
-            d3.select("#breadrow").append("svg")
-                .attr("id", "breadcrumbs")
-                .attr("class", "col-md-12")
-                .attr("style", "height: 30px;");
 
-            breadcrumb = d3.breadcrumb()
-                .container('#breadcrumbs')   
-                .padding(5)
-                .wrapWidth(window.innerWidth)  // hint:  set 100 
-                .height(28)
-                .fontSize(14)
-                .marginLeft(0)
-                .marginTop(4)
-                .leftDirection(false);
-
-            var objectstack = rootStack.concat(currentRoot).map(node => {
-                return {text: node.value(), fill: colorScheme.forNumber(node.value())};
-            });
-            breadcrumb.show(objectstack);
-        }
         showBreadcrumbs();
         
         function showStem(root) {
