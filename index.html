@@ -3,76 +3,102 @@
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Trees</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Data visualization</title>
         <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
-        <script src="./d3.v4.min.js"></script>
-        <script src="./datastructure.js"></script>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <script src="src/Collatz.js"></script>
+        <script src="src/ColorScheme.js"></script>
+        <script src="src/d3/breadcrumb.js"></script>
+        <script src="src/inspect.js"></script>
+        <script src="src/rootbreadcrumb.js"></script>
+        <script src="src/rootstem.js"></script>
+        <script src="src/colorslider-legend.js"></script>
+        <script src="src/barchart.js"></script>
+        <script src="src/radial_tree.js"></script>
+        <script src="src/selection.js"></script>
+        
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <link rel="stylesheet" href="./main.css" />
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="src/main_controls.js"></script>
+
     </head>
-    <body>
-        <svg id="viz">
-        </svg>
+    <body style="background-color: #f2f2f2">
+    <div class="container-fluid" style="width: 100%">
+        <form>
+            <div id="toolrow" class="row nopadding" style="height: 30px;">
+                <div class="form-group col-md-2">
+                    <label for="exampleFormControlSelect2">mode: </label>
+                    <input  type="button" class="form-button" name="fastCollatz" value="reduced" onclick="location.href = location.toString().replace(location.search, '') + '?reduced'"/>
+                    <input  type="button" class="form-button" name="defaultCollatz" value="explicit" onclick="location.href = location.toString().replace(location.search, '')"/>
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="selectedRoot">root: </label>
+                    <input  type="number" id="rootSelector" name="selectedRoot" />
+                    <input  type="button" class="form-button" name="setRoot" value="set" onclick="updateRootToGiven()"/>
+                </div>
+                <svg id="inspection" class="col-md-2"></svg>
+                <svg id="legend" class="col-md-6 nopadding"></svg>
+            </div>
+        </form>
+        <div id="breadrow" class="row nopadding" width="100%" >
+            <div>breadcrumbs:</div>
+            <svg id="breadcrumbs" class="col-md-12 nopadding" style="height: 30px;"></svg>
+        </div>
+        <div id="visrow" class="row">
+            <svg id="radial_tree" class="col-md-5"></svg>
+            <svg id="barchart" class="col-md-7"></svg>
+        </div>
+        <div id="stemrow" class="row nopadding" width="100%">
+            <div>stem:</div>
+            <svg id="stemcrumbs" class="col-md-12 nopadding"></svg>
+        </div>
+    </div>
     </body>
-
     <script>
+        // log current timestamp in console
+        console.log(Date.now());
+    
+        // initialize rootstack
+        let rootStack = [];
 
-        function isEven(n) {
-            return !(n & 1);
-        }
+        // max depth to show in radial Tree
+        let maxTreeDepthRelative = 15;
 
-        /**
-         * @return Array of "step" values
-         */
-        function computeCollatz(n) {
-            if (n < 1) {
-                return [];
-            }
+        // num of horizontal elements in barChart
+        var barChart_numHorizontalElements = 200;
 
-            if (n == 1) {
-                return [1];
-            }
-            
-            let n_next;
-            if (isEven(n)) {
-                n_next = n / 2;
-            }
-            else {
-                n_next = 3 * n + 1;
-            }
+        // colorscheme size = m, max is 20.
+        let m = 5;
 
-            return [n].concat(computeCollatz(n_next));
-        }
+        // initialize colorscheme
+        let colorScheme = new ModuloColorScheme(m);
+        
+        // process url
+        let urlparams = new URLSearchParams(window.location.search);
 
-        let width = 2000;
-        let height = 800;
-        let squareSize = 15;
+        // set the type of the conjecture: reduced or default
+        let conjecture = urlparams.has("reduced")
+            ? new CollatzConjectureFast()
+            : new CollatzConjectureDefault();
+        
+        // set the current root
+        let currentRoot = new CollatzNumberSimple(conjecture, urlparams.has("selectedRoot")? parseInt(urlparams.get("selectedRoot")) : 1);
+        
+        // make the visualization
+        makeRadialTree(currentRoot);
+        barChart(currentRoot);
 
-        var svgContainer = d3.select("body").append("svg")
-            .attr("width", width)
-            .attr("height", height);
- 
+        // tools
+        showLegend(colorScheme);
 
-        var computed = [...Array(100).keys()].map(i => computeCollatz(i));
-        console.dir(computed);
-
-        //Draw the squares
-        computed.forEach(function(v, i){
-            let dp = 0;
-            v.forEach(function(d, j) {
-                svgContainer.append("rect")
-                    .attr("x", i*squareSize)
-                    .attr("y", height - (j*squareSize))
-                    .attr("width", squareSize)
-                    .attr("height", squareSize)
-                    // .css("border", "1px black")
-                    .attr("fill", (d - dp) > 0 ? "green" : "red");
-                    dp = d;
-            });
-        });
-        // var rectangle = svgContainer.append("rect")
-        //     .attr("x", 10)
-        //     .attr("y", 10)
-        //     .attr("width", 50)
-        //     .attr("height", 100);
+        // supporting views
+        inspect(currentRoot);
+        showBreadcrumbs();
+        showStem(currentRoot);
     </script>
+
 </html>
