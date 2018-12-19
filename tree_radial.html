@@ -103,7 +103,7 @@
 
         // tools
         showLegend(colorScheme);
-        
+
         // supporting views
         inspect(currentRoot);
         showBreadcrumbs();
@@ -352,7 +352,7 @@
                         .attr("height", squareHeight)
                         .attr("title", innernode.value())
                         .attr("class", "bar"+innernode.value() + " cBar"+node.value())
-                        .on("mouseover", (innernode => () => highlight(node, innernode))(innernode))
+                        .on("mouseover", ((innernode, node) => () => highlight(node, innernode))(innernode, node))
                         .on("click", (innernode => () => updateRoot(innernode))(innernode))
                         .attr("fill", (innernode.value() === root.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
                     innernode = innernode.parent();
