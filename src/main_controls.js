@@ -54,7 +54,7 @@ function redraw(_root, _amount, _treeDepth) {
 /**
  *  @param newRoot The selected node, if same as current root will reset to previous root
  */
-function updateRoot(newRoot) {
+function updateRoot(newRoot, nopush) {
     /* store/load the root node */
     if (rootStack.length > 0 && newRoot === currentRoot) {
         // clicked on root
@@ -71,4 +71,11 @@ function updateRoot(newRoot) {
     showBreadcrumbs();
     showStem(currentRoot);
     inspect(currentRoot);
+    if (!nopush) {
+        history.pushState({root: currentRoot.value()}, null, "?selectedRoot="+currentRoot.value());
+    }
 }
+
+window.addEventListener('popstate', function(e) {
+    updateRoot(currentRoot, true);
+});
