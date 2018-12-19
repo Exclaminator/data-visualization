@@ -4,7 +4,7 @@ function inspect(nd) {
     d3.select("#inspection").remove();
     d3.select("#toolrow").insert("svg", "#legend")
         .attr("id", "inspection")
-        .attr("class", "col-md-3 no-padding")
+        .attr("class", "col-md-2 no-padding")
         .attr("style", "height: 30px; padding: 0px;");
 
     const svg = d3.select("#inspection");
@@ -49,16 +49,24 @@ function inspect(nd) {
         .attr("fill", d => d.fill);
 
     block.append("text")
+        .attr("x", fw-100)
+        .attr("y", 15)
+        .attr("dy", 5)
+        .attr("fill", "black")
+        .text(d => "depth:" + d.depth);
+        
+    block.append("text")
         .attr("x", 20)
         .attr("y", 15)
         .attr("dy", ".35em")
         .attr("fill", "white")
         .text(d => "value: "+d.text);
 
-    block.append("text")
-        .attr("x", fw-100)
-        .attr("y", 15)
-        .attr("dy", 5)
-        .attr("fill", "black")
-        .text(d => "depth:" + d.depth);
+    
+    svg.append("rect")
+        .attr("x", fw-1)
+        .attr("y", 0)
+        .attr("width", 1)
+        .attr("height", 30)
+        .attr("fill", "black");
 }
