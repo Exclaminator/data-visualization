@@ -111,9 +111,9 @@
                 .attr("style", "height: 30px; padding: 0px;");
             
             const svg = d3.select("#inspection");
-            var fw = parseInt(svg.style("width"));
+            let fw = parseInt(svg.style("width"));
             const dx = fw/5;
-            var fh = parseInt(svg.style("height"));
+            let fh = parseInt(svg.style("height"));
             
             var show = [];
             if(nd.prev()) {
@@ -144,8 +144,8 @@
 
             block.append("rect")
                 .attr("width", dx)
-                .attr("height", (d,i) => 30)
-                .attr("fill", d => {return d.fill});
+                .attr("height", 30)
+                .attr("fill", d => d.fill);
 
             block.append("text")
                 .attr("x", d => (d.text > 9)? dx/2 - 8 : dx/2 - 3)
@@ -159,7 +159,7 @@
                 .attr("y", 22)
                 .attr("dy", 5)
                 .attr("fill", "black")
-                .text(function(d) { return d.depth; });
+                .text(d => d.depth);
             
         }
         inspect(currentRoot);
@@ -208,9 +208,9 @@
                 .marginTop(4)
                 .leftDirection(false);
 
-            var objectstack = [];
-            var node = root;
-            for( var i = 0; i <= root.depth(); i++) {
+            let objectstack = [];
+            let node = root;
+            for(let i = 0; i <= root.depth(); i++) {
                 objectstack[i] = {
                     text: node.value(), 
                     fill: colorScheme.forNumber(node.value())
@@ -277,14 +277,14 @@
 
             function dragged(d) {
                 d3.select("#slider").attr("x", d.x = Math.max(0, Math.min(d3.event.x, 19.8*dx)));
-                var m = Math.ceil(d3.event.x/dx);
+                let m = Math.ceil(d3.event.x/dx);
                 colorScheme.changeModulo(m);
                 block.select("rect").attr("fill", (d, i) => { return colorScheme.forNumber(i)});
             }
 
             function dragended(d) {
                 d3.select("#slider").classed("active", false);
-                var m = Math.ceil(d3.event.x/dx);
+                let m = Math.ceil(d3.event.x/dx);
                 // d3.select("#slider").attr("x", d.x = Math.max(0, Math.min(m*dx, 19*dx)));
                 changeNumColors(m);
             }
