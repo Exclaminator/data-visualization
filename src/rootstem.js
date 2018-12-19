@@ -2,7 +2,8 @@ function showStem(root) {
     d3.select("#stemcrumbs").remove();
     d3.select("#stemrow").append("svg")
         .attr("id", "stemcrumbs")
-        .attr("class", "col-md-12");
+        .attr("class", "col-md-12")
+        .attr("style", "height: 60px");
 
     stemcrumbs = d3.breadcrumb()
         .container('#stemcrumbs')
