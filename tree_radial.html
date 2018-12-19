@@ -148,7 +148,7 @@
 
             var objectstack = [];
             var node = root;
-            for( var i = 0; i < root.depth(); i++) {
+            for( var i = 0; i <= root.depth(); i++) {
                 objectstack[i] = {
                     text: node.value(), 
                     fill: colorScheme.forNumber(node.value())
