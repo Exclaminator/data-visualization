@@ -134,8 +134,9 @@
         }
         showBreadcrumbs();
         
+
+
         function showLegend() {
-            
             d3.select("#legend").remove();
             d3.select("body").select("#toolrow")
                 .append("svg")
@@ -161,7 +162,7 @@
                 .attr("fill", (d,i) => colorScheme.forNumber(i));
 
             block.append("text")
-                .attr("x", Math.max(0, dx/2 - Math.min(15, m)))
+                .attr("x", d => (d.value > 9)? dx/2 - 8 : dx/2 - 3)
                 .attr("y", 30 / 2)
                 .attr("dy", ".35em")
                 .attr("fill", "white")
