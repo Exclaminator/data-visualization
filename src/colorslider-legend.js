@@ -58,7 +58,7 @@ function showLegend(colorScheme) {
     }
 
     function dragged(d) {
-        d3.select("#slider").attr("x", d.x = Math.max(0, Math.min(d3.event.x, 19.8*dx)));
+        d3.select("#slider").attr("x", d.x = Math.max(1.5*dx, Math.min(d3.event.x, 20.8*dx)));
         let m = Math.ceil(d3.event.x/dx - 1.5);
         colorScheme.changeModulo(m);
         block.select("rect").attr("fill", (d, i) => { return colorScheme.forNumber(i)});
@@ -66,7 +66,7 @@ function showLegend(colorScheme) {
 
     function dragended(d) {
         d3.select("#slider").classed("active", false);
-        let m = Math.ceil(d3.event.x/dx);
+        let m = Math.ceil(d3.event.x/dx - 1.5);
         // d3.select("#slider").attr("x", d.x = Math.max(0, Math.min(m*dx, 19*dx)));
         changeNumColors(m);
     }
