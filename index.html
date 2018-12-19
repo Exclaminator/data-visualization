@@ -14,6 +14,10 @@
         <script src="src/rootbreadcrumb.js"></script>
         <script src="src/rootstem.js"></script>
         <script src="src/colorslider-legend.js"></script>
+        <script src="src/barchart.js"></script>
+        <script src="src/radial_tree.js"></script>
+        <script src="src/selection.js"></script>
+        <script src="src/main_controls.js"></script>
         
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         <link rel="stylesheet" href="./main.css" />
@@ -28,7 +32,7 @@
             <div id="toolrow" class="row nopadding" style="height: 30px;">
                 <div class="form-group col-md-2">
                     <label for="exampleFormControlSelect2">mode: </label>
-                    <input  type="button" class="form-button" name="fastCollatz" value="reduced" onclick="location.href = location.toString().replace(location.search, '') + '?fast'"/>
+                    <input  type="button" class="form-button" name="fastCollatz" value="reduced" onclick="location.href = location.toString().replace(location.search, '') + '?reduced'"/>
                     <input  type="button" class="form-button" name="defaultCollatz" value="explicit" onclick="location.href = location.toString().replace(location.search, '')"/>
                 </div>
                 <div class="form-group col-md-2">
@@ -55,20 +59,30 @@
     </div>
     </body>
     <script>
+        // log current timestamp in console
         console.log(Date.now());
-
+    
+        // initialize rootstack
         let rootStack = [];
+
+        // max depth to show in radial Tree
         let maxTreeDepthRelative = 15;
+
+        // num of horizontal elements in barChart
         var barChart_numHorizontalElements = 200;
 
         // colorscheme size = m, max is 20.
         let m = 5;
+
+        // initialize colorscheme
         let colorScheme = new ModuloColorScheme(m);
 
-        let conjecture = new URLSearchParams(window.location.search).has("fast")
+        // set the type of the conjecture: reduced or default
+        let conjecture = new URLSearchParams(window.location.search).has("reduced")
             ? new CollatzConjectureFast()
             : new CollatzConjectureDefault();
-
+        
+        // set the current root
         let currentRoot = new CollatzNumberSimple(conjecture, 1);
         
         // make the visualization
@@ -82,296 +96,6 @@
         inspect(currentRoot);
         showBreadcrumbs();
         showStem(currentRoot);
-
-        function changeNumColors(newNumColors) {
-            colorScheme.changeModulo(parseInt(newNumColors));
-
-            unlight();
-            d3.select("#radial_tree")
-                .selectAll("circle")
-                .attr("fill", d => (d.data.value() === currentRoot.value())? colorScheme.forRoot() : colorScheme.forNumber(d.data.value()));
-
-            highlight();
-            showBreadcrumbs();
-            barChart(currentRoot);
-            showStem(currentRoot);
-            inspect(currentRoot);
-        }
-        
-        function updateRootToGiven() {
-            var value = parseInt(d3.select("#rootSelector")._groups[0][0].value);
-            if (value) {
-                updateRoot(currentRoot.get(value));
-            }
-        }
-
-        function changeTreeDepth(newTreeDepth) {
-            redraw(currentRoot, barChart_numHorizontalElements, newTreeDepth)
-        }
-        
-        var resizeId;
-        $(window).resize(function() {
-            clearTimeout(resizeId);
-            resizeId = setTimeout(doneResizing, 500);
-        });
-
-        function doneResizing(){
-            redraw(currentRoot, barChart_numHorizontalElements, maxTreeDepthRelative)
-        }
-
-        // TODO: add conjecture input
-        function redraw(_root, _amount, _treeDepth) {
-            barChart_numHorizontalElements = _amount;
-
-            if (maxTreeDepthRelative != _treeDepth) {
-                console.log(`new depth: ${_treeDepth}, old depth = ${maxTreeDepthRelative}`)
-                maxTreeDepthRelative = _treeDepth;
-            }
-
-            makeRadialTree(_root);
-            barChart(_root);
-            showBreadcrumbs();
-            showStem(_root);
-            inspect(_root);
-            showLegend(colorScheme);
-        }
-
-        /**
-         *  @param newRoot The selected node, if same as current root will reset to previous root
-         */
-        function updateRoot(newRoot) {
-            /* store/load the root node */
-            if (rootStack.length > 0 && newRoot === currentRoot) {
-                // clicked on root
-                const nod = rootStack.pop();
-                makeRadialTree(nod);
-                currentRoot = nod;
-            } else {
-                rootStack.push(currentRoot);
-                makeRadialTree(newRoot);
-                currentRoot = newRoot;
-            }
-
-            barChart(currentRoot);
-            showBreadcrumbs();
-            showStem(currentRoot);
-            inspect(currentRoot);
-        }
-
-        function makeRadialTree(collatzNode) {
-            var svg = d3.select("#radial_tree");
-            const width = parseInt(svg.style("width"));
-            const height = width;
-            const radius = width / 2 - 60;
-            const dy = 30;
-            const dx = 10;
-
-            let tree = data => d3.tree()
-                .size([Math.PI * 2, radius])
-                .separation((a, b) => (a.parent.name === b.parent.name ? 1 : 2) / a.depth)
-                (d3.hierarchy(data, d => {
-                    if (d.depth() < maxTreeDepthRelative + collatzNode.depth() - Math.log(d.depth())) { // + collatzNodeAsRoot.depth()) {
-                        return d.children();
-                    } else {
-                        return null;
-                    }
-                }));
-
-            const root = tree(collatzNode);
-
-            d3.select("#radial_tree").remove();
-            d3.select("body").select("#visrow")
-                .insert("svg", "#barchart")
-                .attr("id", "radial_tree")
-                .attr("class", "col-md-5");
-            
-
-            svg = d3.select("#radial_tree")
-                .style("height", "100%")
-                .style("padding", "10px")
-                .style("box-sizing", "border-box")
-                .style("font", "10px sans-serif");
-
-            const g = svg.append("g");
-
-            const link = g.append("g")
-                .attr("fill", "none")
-                .attr("stroke", "#555")
-                .attr("stroke-opacity", 0.4)
-                .attr("stroke-width", 1.5)
-                .selectAll("path")
-                .data(root.links()).enter()
-                    .append("path")
-                    .attr("d", d3.linkRadial()
-                    .angle(d => d.x)
-                    .radius(d => d.y));
-
-            const node = g.append("g")
-                .attr("stroke-linejoin", "round")
-                .attr("stroke-width", 3)
-                .selectAll("g")
-                .data(root.descendants().reverse())
-                .enter().append("g")
-                .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
-            
-            node.append("circle")
-                .attr("fill", d => (d === root)? colorScheme.forRoot() : colorScheme.forNumber(d.data.value()))
-                .attr("r", 7)
-                .attr("id", d => "circle" + d.data.value());
-
-            function isEven(n) {
-                return !(n & 1);
-            }
-
-            node.append("text")
-                .attr("dy", d => {
-                    if (!d.children) {
-                        return "0.4em";
-                    }
-                    return isEven(d.depth) ? "-0.5em" : "1.2em"
-                })
-                .attr("x", d => d.x < Math.PI ? 6 : -6)
-                .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
-                .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
-                .text(d => d.data.value())
-                .clone(true).lower()
-                .attr("stroke", "white")
-                .attr("text-align", "left");
-
-            const box = g.node().getBBox();
-            
-            svg
-                .attr("width", width)
-                .attr("height", height)
-                .attr("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
-                
-            // update onclick and mouse events here.
-            d3.select("#radial_tree").selectAll("circle")
-                .attr("cursor", "pointer")
-                .on("mouseover", d => highlight(d.data))
-                .on("click", d => updateRoot(d.data));
-
-            return svg.node();
-        }
-        
-        //////
-        // mouse-in and -out functions
-        //////
-
-        /**
-         * Usage: highlight(node) when hovering over node in tree, highlight(node, inner) when hovering over the barchart
-        * @param node "the element of the column (topmost) i.e. elem that generates the column"
-        * @param innernode "the element in the column you're hovering over"
-        */
-        function highlight(node, innernode) {
-
-            // save what is going to be highlighted
-            if (node){
-                this.highlighted = node;
-            }
-
-            // nothing highlighted, so nothing to do
-            if (this.highlighted === undefined) {
-                return;
-            }
-
-
-            // handle missing innernode arg (highlight node in tree and whole bar in barchart)
-            if (!innernode) {
-                innernode = this.highlighted;
-            }
-
-            // sticky-highlighting: unlight everything only on new highlight command
-            unlight();
-
-            let nd = this.highlighted;
-            for (var i = 0; i <= this.highlighted.depth(); i++) {
-                let color = nd.value() === innernode.value() ? colorScheme.forSpecial(0) : colorScheme.forSpecial(1);
-
-                d3.select("#radial_tree").select("#circle"+nd.value()).style("stroke", color);
-                d3.select("#barchart").selectAll(".bar"+nd.value()).style("stroke", color);
-                nd = nd.parent();
-            }
-            inspect(innernode);
-        }
-
-        
-        function unlight() {
-            d3.select("#radial_tree").selectAll("circle").style("stroke", "none");
-            d3.select("#barchart").selectAll("rect").style("stroke", "none");
-        }
-
-        ///////
-        // Bar chart
-        ///////
-        function barChart(root) {
-            let node = root;
-            let maxDepth = 0;
-            let maxDepthNode = 0;
-            for (let i = 0; i < barChart_numHorizontalElements; i++) {
-                maxDepth = Math.max(node.depth(), maxDepth);
-                if (node.depth() == maxDepth) {
-                    maxDepthNode = node.value();
-                }
-                node = node.next();
-            }
-
-            const svg = d3.select("#barchart");
-            const height = parseInt(svg.style("height"));
-            const width = parseInt(svg.style("width"))-8;
-
-            // don't remove the +1, hacky reasons
-            const squareHeight = (height-100) / (maxDepth + 1);
-            const squareWidth = width / barChart_numHorizontalElements;
-
-            d3.select("#barchart").remove();
-            var svgContainer = d3.select("#visrow").append("svg")
-                .attr("id", "barchart")
-                .attr("class", "col-md-7");
-            
-            function drawbox(x, value) {
-                svgContainer.select(".hinbox").remove();
-
-                var box = svgContainer.append("g")
-                    .attr("class", "hinbox")
-                    .attr("transform", "translate("+ (x-0.5)*squareWidth +", "+ (height - 50) +")");
-
-                // box.append("rect")
-                //     .attr("width", 100)
-                //     .attr("height", 30)
-                //     .attr("fill", "pink");
-
-                box.append("text")
-                    .attr("x", 0)
-                    .attr("y", 15)
-                    .attr("dy", ".35em")
-                    .attr("fill", "black")
-                    .text(value);
-            }
-            drawbox(maxDepthNode-root.value(), maxDepthNode);
-            
-            node = root;
-            let innernode = root;
-
-            for (var i = 0; i < barChart_numHorizontalElements; i++) {
-                innernode = node;
-                for (var j = 0; j <= node.depth(); j++) {
-                    svgContainer.append("rect")
-                        .attr("x", i*squareWidth)
-                        //.attr("y", height - (j*squareHeight))     // inverted version
-                        .attr("y", height - 50 - (node.depth()+1)*squareHeight + (j*squareHeight))
-                        .attr("width", squareWidth)
-                        .attr("height", squareHeight)
-                        .attr("title", innernode.value())
-                        .attr("class", "bar"+innernode.value() + " cBar"+node.value())
-                        .on("mouseover", ((innernode, node) => () => { highlight(node, innernode); drawbox(node.value() - root.value(), node.value()) })(innernode, node))
-                        .on("click", (innernode => () => updateRoot(innernode))(innernode))
-                        .attr("fill", (innernode.value() === root.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
-                    innernode = innernode.parent();
-                }
-                node = node.next();
-            }
-        }
     </script>
 
 </html>
