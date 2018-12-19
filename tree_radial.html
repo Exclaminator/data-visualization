@@ -32,7 +32,7 @@
                     <input  type="button" class="form-button" name="fastCollatz" value="Reduced" onclick="location.href = location.toString().replace(location.search, '') + '?fast'"/>
                     <input  type="button" class="form-button" name="defaultCollatz" value="Explicit" onclick="location.href = location.toString().replace(location.search, '')"/>
                 </div>
-                <div id="inspection" class="col-md-3">20</div>
+                <svg id="inspection" class="col-md-3"></svg>
                 <svg id="legend" class="col-md-6 nopadding"></svg>
             </div>
         </form>
@@ -100,7 +100,69 @@
         // make the visualization
         makeRadialTree(currentRoot);
         barChart(currentRoot);
+        
+        function inspect(nd) {
+            // const nd = currentRoot.get(parseInt(number));
+            
+            d3.select("#inspection").remove();
+            d3.select("#toolrow").insert("svg", "#legend")
+                .attr("id", "inspection")
+                .attr("class", "col-md-3 no-padding")
+                .attr("style", "height: 30px; padding: 0px;");
+            
+            const svg = d3.select("#inspection");
+            var fw = parseInt(svg.style("width"));
+            const dx = fw/5;
+            var fh = parseInt(svg.style("height"));
+            
+            var show = [];
+            if(nd.prev()) {
+                if(nd.prev().prev()) {
+                    show[0] = nd.prev().prev();
+                } else {
+                    show[0] = null;
+                }
+                show[1] = nd.prev();
+            } else {
+                show[0] = null;
+                show[1] = null;
+            }
+            show[2] = nd;
+            show[3] = nd.next();
+            show[4] = nd.next().next();
 
+            var objectstack = show.map(node => {
+                if (node != null) {
+                    return {text: node.value(), depth: node.depth(), fill: colorScheme.forNumber(node.value())};
+                } else {
+                    return {text: "", depth: "", fill: "none"};
+                }
+            });
+
+            var block = svg.selectAll("g").data(objectstack).enter().append("g")
+                 .attr("transform", function(d, i) { return "translate(" + i * dx + ", 0)"; });
+
+            block.append("rect")
+                .attr("width", dx)
+                .attr("height", (d,i) => 30)
+                .attr("fill", d => {return d.fill});
+
+            block.append("text")
+                .attr("x", d => (d.text > 9)? dx/2 - 8 : dx/2 - 3)
+                .attr("y", 10)
+                .attr("dy", ".35em")
+                .attr("fill", "white")
+                .text(function(d) { return d.text; });
+
+            block.append("text")
+                .attr("x", 0)
+                .attr("y", 22)
+                .attr("dy", 5)
+                .attr("fill", "black")
+                .text(function(d) { return d.depth; });
+            
+        }
+        inspect(currentRoot);
         
         // show breadcrumbs
         
@@ -447,6 +509,7 @@
                 d3.select("#barchart").selectAll(".bar"+nd.value()).style("stroke", color);
                 nd = nd.parent();
             }
+            inspect(this.highlighted);
         }
 
         
