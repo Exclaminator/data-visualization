@@ -49,16 +49,16 @@ function inspect(nd) {
         .attr("fill", d => d.fill);
 
     block.append("text")
-        .attr("x", d => (d.text > 9)? dx/2 - 8 : dx/2 - 3)
-        .attr("y", 10)
+        .attr("x", 20)
+        .attr("y", 15)
         .attr("dy", ".35em")
         .attr("fill", "white")
-        .text(function(d) { return d.text; });
+        .text(d => "value: "+d.text);
 
     block.append("text")
-        .attr("x", 0)
-        .attr("y", 22)
+        .attr("x", fw-100)
+        .attr("y", 15)
         .attr("dy", 5)
         .attr("fill", "black")
-        .text(d => d.depth);
+        .text(d => "depth:" + d.depth);
 }

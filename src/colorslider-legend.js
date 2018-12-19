@@ -12,11 +12,11 @@ function showLegend(colorScheme) {
     const shemeObjects = colorScheme.getSchemeObjects();
     const t = shemeObjects.length;
     const m = colorScheme.getModulo();
-    const dx = fw / t;
+    const dx = fw / (t+1.5);
 
 
     var block = svg.selectAll("g").data(shemeObjects).enter().append("g")
-        .attr("transform", function(d, i) { return "translate(" + i * dx + ", 0)"; });
+        .attr("transform", function(d, i) { return "translate(" + (i+1.5) * dx + ", 0)"; });
 
     block.append("rect")
         .attr("width", dx)
@@ -33,7 +33,7 @@ function showLegend(colorScheme) {
 
     svg.append("rect")
         .datum([{value: "bloep"}])
-        .attr("x", fw*m/t - dx/2)
+        .attr("x", fw*m/t + dx/2)
         .attr("y", 0)
         .attr("width", 5)
         .attr("height", 30)
@@ -46,6 +46,12 @@ function showLegend(colorScheme) {
             .on("start", dragstarted)
             .on("drag", dragged)
             .on("end", dragended));
+    svg.append("text")
+        .attr("x", 4)
+        .attr("y", 30 / 2)
+        .attr("dy", ".35em")
+        .attr("fill", "black")
+        .text("modulo:");
 
     function dragstarted(d) {
         d3.select("#slider").raise().classed("active", true);
@@ -53,7 +59,7 @@ function showLegend(colorScheme) {
 
     function dragged(d) {
         d3.select("#slider").attr("x", d.x = Math.max(0, Math.min(d3.event.x, 19.8*dx)));
-        let m = Math.ceil(d3.event.x/dx);
+        let m = Math.ceil(d3.event.x/dx - 1.5);
         colorScheme.changeModulo(m);
         block.select("rect").attr("fill", (d, i) => { return colorScheme.forNumber(i)});
     }

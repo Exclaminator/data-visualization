@@ -24,9 +24,6 @@
     </head>
     <body>
     <div class="container-fluid" style="width: 100%">
-        <div id="breadrow" class="row nopadding" width="100%" >
-            <svg id="breadcrumbs" class="col-md-12 nopadding" style="height: 30px;"></svg>
-        </div>
         <form>
             <div id="toolrow" class="row nopadding" style="height: 30px;">
                 <div class="form-group col-md-3">
@@ -38,11 +35,16 @@
                 <svg id="legend" class="col-md-6 nopadding"></svg>
             </div>
         </form>
+        <div id="breadrow" class="row nopadding" width="100%" >
+            <div>breadcrumbs:</div>
+            <svg id="breadcrumbs" class="col-md-12 nopadding" style="height: 30px;"></svg>
+        </div>
         <div id="visrow" class="row">
             <svg id="radial_tree" class="col-md-5"></svg>
             <svg id="barchart" class="col-md-6"></svg>
         </div>
         <div id="stemrow" class="row nopadding" width="100%">
+            <div>stem:</div>
             <svg id="stemcrumbs" class="col-md-12 nopadding"></svg>
         </div>
     </div>
