@@ -111,36 +111,40 @@
                 .attr("style", "height: 30px; padding: 0px;");
             
             const svg = d3.select("#inspection");
+
             let fw = parseInt(svg.style("width"));
-            const dx = fw/5;
+            // const dx = fw/5;
+            const dx = fw;
             let fh = parseInt(svg.style("height"));
             
-            var show = [];
-            if(nd.prev()) {
-                if(nd.prev().prev()) {
-                    show[0] = nd.prev().prev();
-                } else {
-                    show[0] = null;
-                }
-                show[1] = nd.prev();
-            } else {
-                show[0] = null;
-                show[1] = null;
-            }
-            show[2] = nd;
-            show[3] = nd.next();
-            show[4] = nd.next().next();
+            // var show = [];
+            // if(nd.prev()) {
+            //     if(nd.prev().prev()) {
+            //         show[0] = nd.prev().prev();
+            //     } else {
+            //         show[0] = null;
+            //     }
+            //     show[1] = nd.prev();
+            // } else {
+            //     show[0] = null;
+            //     show[1] = null;
+            // }
+            // show[2] = nd;
+            // show[3] = nd.next();
+            // show[4] = nd.next().next();
 
-            var objectstack = show.map(node => {
-                if (node != null) {
-                    return {text: node.value(), depth: node.depth(), fill: colorScheme.forNumber(node.value())};
-                } else {
-                    return {text: "", depth: "", fill: "none"};
-                }
-            });
+            // var objectstack = show.map(node => {
+            //     if (node != null) {
+            //         return {text: node.value(), depth: node.depth(), fill: colorScheme.forNumber(node.value())};
+            //     } else {
+            //         return {text: "", depth: "", fill: "none"};
+            //     }
+            // });
 
-            var block = svg.selectAll("g").data(objectstack).enter().append("g")
-                 .attr("transform", function(d, i) { return "translate(" + i * dx + ", 0)"; });
+            var block = svg.selectAll("g")
+                .data([{text: nd.value(), depth: nd.depth(), fill: colorScheme.forNumber(nd.value())}])
+                .enter().append("g")
+                .attr("transform", (d, i) => `translate(${i * dx}, 0)`);
 
             block.append("rect")
                 .attr("width", dx)
