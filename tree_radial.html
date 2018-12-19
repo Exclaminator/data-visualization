@@ -41,7 +41,7 @@
         </div>
         <div id="visrow" class="row">
             <svg id="radial_tree" class="col-md-5"></svg>
-            <svg id="barchart" class="col-md-6"></svg>
+            <svg id="barchart" class="col-md-7"></svg>
         </div>
         <div id="stemrow" class="row nopadding" width="100%">
             <div>stem:</div>
@@ -194,7 +194,8 @@
             d3.select("#radial_tree").remove();
             d3.select("body").select("#visrow")
                 .insert("svg", "#barchart")
-                .attr("id", "radial_tree");
+                .attr("id", "radial_tree")
+                .attr("class", "col-md-5");
             
 
             svg = d3.select("#radial_tree")
@@ -336,7 +337,7 @@
             d3.select("#barchart").remove();
             var svgContainer = d3.select("#visrow").append("svg")
                 .attr("id", "barchart")
-                .attr("class", "col-md-6");
+                .attr("class", "col-md-7");
 
                 
             
