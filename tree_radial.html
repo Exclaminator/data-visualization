@@ -37,8 +37,11 @@
             </div>
         </form>
         <div id="visrow" class="row">
-            <svg id="radial_tree" class="col-md-6"></svg>
+            <svg id="radial_tree" class="col-md-5"></svg>
             <svg id="barchart" class="col-md-6"></svg>
+        </div>
+        <div id="stemrow" class="row nopadding" width="100%">
+            <svg id="stemcrumbs" class="col-md-12 nopadding"></svg>
         </div>
     </div>
     </body>
@@ -78,15 +81,8 @@
         let maxTreeDepthRelative = 15;
         var barChart_numHorizontalElements = 200;
 
-        const height = window.innerHeight*5/6;
-        const width = window.innerWidth/2 - 50;
-
-        const radius = width / 2 - 60;
-        const dy = 30;
-        const dx = 10;
-
         // colorscheme size = m, max is 20.
-        let m = 2;
+        let m = 5;
         let colorScheme = new ModuloColorScheme(m);
 
         // init UI positions
@@ -134,6 +130,34 @@
         }
         showBreadcrumbs();
         
+        function showStem(root) {
+            d3.select("#stemcrumbs").remove();
+            d3.select("#stemrow").append("svg")
+                .attr("id", "stemcrumbs")
+                .attr("class", "col-md-12");
+
+            stemcrumbs = d3.breadcrumb()
+                .container('#stemcrumbs')   
+                .padding(5)
+                .wrapWidth(window.innerWidth-100)  // hint:  set 100 
+                .height(28)
+                .fontSize(14)
+                .marginLeft(0)
+                .marginTop(4)
+                .leftDirection(false);
+
+            var objectstack = [];
+            var node = root;
+            for( var i = 0; i < root.depth(); i++) {
+                objectstack[i] = {
+                    text: node.value(), 
+                    fill: colorScheme.forNumber(node.value())
+                };
+                node = node.parent();
+            }
+            stemcrumbs.show(objectstack);
+        }
+        showStem(currentRoot); 
 
 
         function showLegend() {
@@ -243,6 +267,7 @@
             showBreadcrumbs();
             //showLegend();
             barChart(currentRoot);
+            showStem(currentRoot);
         }
 
         function changeTreeDepth(newTreeDepth) {
@@ -261,6 +286,7 @@
             makeRadialTree(_root);
             barChart(_root);
             showBreadcrumbs();
+            showStem(currentRoot);
         }
 
         /**
@@ -281,9 +307,19 @@
 
             barChart(currentRoot);
             showBreadcrumbs();
+            showStem(currentRoot);
         }
 
         function makeRadialTree(collatzNode) {
+                        // const height = window.innerHeight*5/6;
+            // const width = window.innerWidth/2 - 50;
+            var svg = d3.select("#radial_tree");
+            const width = parseInt(svg.style("width"));
+            const height = width;
+            const radius = width / 2 - 60;
+            const dy = 30;
+            const dx = 10;
+
             let tree = data => d3.tree()
                 .size([Math.PI * 2, radius])
                 .separation((a, b) => (a.parent.name === b.parent.name ? 1 : 2) / a.depth)
@@ -301,9 +337,9 @@
             d3.select("body").select("#visrow")
                 .insert("svg", "#barchart")
                 .attr("id", "radial_tree");
+            
 
-
-            const svg = d3.select("#radial_tree")
+            svg = d3.select("#radial_tree")
                 .style("height", "100%")
                 .style("padding", "10px")
                 .style("box-sizing", "border-box")
@@ -430,6 +466,10 @@
                 node = node.next();
             }
 
+            const svg = d3.select("#barchart");
+            const height = parseInt(svg.style("height"));
+            const width = parseInt(svg.style("width"));
+
             // don't remove the +1, hacky reasons
             const squareHeight = (height-100) / (maxDepth + 1);
             const squareWidth = width / barChart_numHorizontalElements;
@@ -437,8 +477,9 @@
             d3.select("#barchart").remove();
             var svgContainer = d3.select("#visrow").append("svg")
                 .attr("id", "barchart")
-                .attr("width", width)
-                .attr("height", (height - 50));
+                .attr("class", "col-md-6");
+
+                
             
             node = root;
             let innernode = root;
