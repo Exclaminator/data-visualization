@@ -14,37 +14,33 @@
         <script src="./d3.slider.js"></script>
         
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-        <link rel="stylesheet" href="./d3.slider.css" />
+        <link rel="stylesheet" href="./main.css" />
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
     </head>
     <body>
-        <div id="breadrow" class="row" width="100%" >
-            <svg id="breadcrumbs" class="col-md-12" style="height: 30px;"></svg>
+    <div class="container-fluid" style="width: 100%">
+        <div id="breadrow" class="row nopadding" width="100%" >
+            <svg id="breadcrumbs" class="col-md-12 nopadding" style="height: 30px;"></svg>
         </div>
         <form>
-            <div id="toolrow" class="row" style="height: 30px;">
-                    
-                <div class="form-group">
-                        <label for="exampleFormControlSelect2">Mode: </label>
-                        <input  type="button" class="form-button" name="fastCollatz" value="Reduced" onclick="location.href = location.toString().replace(location.search, '') + '?fast'"/>
-                        <input  type="button" class="form-button" name="defaultCollatz" value="Explicit" onclick="location.href = location.toString().replace(location.search, '')"/>
-                    </div>
-                    <div id="inspection" class="col-md-3">20</div>
-                        <!-- <div class="form-group">
-                            <label for="colors-slider">Colors (= modulo)</label>
-                            <input type="range" class="form-control-range" id="colors-slider" min="1" max="18" onchange="changeNumColors(this.value)">
-                        </div>   -->
-                    </div>
-                <svg id="legend" class="col-md-6"></svg>
+            <div id="toolrow" class="row nopadding" style="height: 30px;">
+                <div class="form-group col-md-3">
+                    <label for="exampleFormControlSelect2">Mode: </label>
+                    <input  type="button" class="form-button" name="fastCollatz" value="Reduced" onclick="location.href = location.toString().replace(location.search, '') + '?fast'"/>
+                    <input  type="button" class="form-button" name="defaultCollatz" value="Explicit" onclick="location.href = location.toString().replace(location.search, '')"/>
+                </div>
+                <div id="inspection" class="col-md-3">20</div>
+                <svg id="legend" class="col-md-6 nopadding"></svg>
             </div>
         </form>
         <div id="visrow" class="row">
             <svg id="radial_tree" class="col-md-6"></svg>
             <svg id="barchart" class="col-md-6"></svg>
         </div>
+    </div>
     </body>
 
 
@@ -90,7 +86,7 @@
         const dx = 10;
 
         // colorscheme size = m, max is 20.
-        let m = 5;
+        let m = 2;
         let colorScheme = new ModuloColorScheme(m);
 
         // init UI positions
@@ -144,7 +140,8 @@
             d3.select("body").select("#toolrow")
                 .append("svg")
                 .attr("id", "legend")
-                .attr("class", "col-md-6");
+                .attr("class", "col-md-6 nopadding")
+                .attr("style", "padding: 0px;");
 
             const svg = d3.select("#legend");
             var fw = parseInt(svg.style("width"));
@@ -173,7 +170,7 @@
 
             svg.append("rect")
                 .datum([{value: "bloep"}])
-                .attr("x", fw*m/t + dx/2)
+                .attr("x", fw*m/t - dx/2)
                 .attr("y", 0)
                 .attr("width", 5)
                 .attr("height", 30)
@@ -192,16 +189,15 @@
             }
 
             function dragged(d) {
-                d3.select("#slider").attr("x", d.x = Math.max(0, Math.min(d3.event.x, 19*dx)));
-                console.log(Math.floor(d3.event.x/dx));
-                var m = Math.floor(d3.event.x/dx);
+                d3.select("#slider").attr("x", d.x = Math.max(0, Math.min(d3.event.x, 19.8*dx)));
+                var m = Math.ceil(d3.event.x/dx);
                 colorScheme.changeModulo(m);
                 block.select("rect").attr("fill", (d, i) => { return colorScheme.forNumber(i)});
             }
 
             function dragended(d) {
                 d3.select("#slider").classed("active", false);
-                var m = Math.floor(d3.event.x/dx);
+                var m = Math.ceil(d3.event.x/dx);
                 // d3.select("#slider").attr("x", d.x = Math.max(0, Math.min(m*dx, 19*dx)));
                 changeNumColors(m);
             }
@@ -369,6 +365,7 @@
                 
             // update onclick and mouse events here.
             d3.select("#radial_tree").selectAll("circle")
+                .attr("cursor", "pointer")
                 .on("mouseover", d => highlight(d.data))
                 .on("click", d => updateRoot(d.data));
 
