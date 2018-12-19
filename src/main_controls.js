@@ -77,5 +77,5 @@ function updateRoot(newRoot, nopush) {
 }
 
 window.addEventListener('popstate', function(e) {
-    updateRoot(currentRoot, true);
+    updateRoot(currentRoot.get(parseInt(e.state.root)), true);
 });
