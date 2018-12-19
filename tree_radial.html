@@ -27,7 +27,7 @@
         <form>
             <div id="toolrow" class="row nopadding" style="height: 30px;">
                 <div class="form-group col-md-3">
-                    <label for="exampleFormControlSelect2">Mode: </label>
+                    <label for="exampleFormControlSelect2">mode: </label>
                     <input  type="button" class="form-button" name="fastCollatz" value="Reduced" onclick="location.href = location.toString().replace(location.search, '') + '?fast'"/>
                     <input  type="button" class="form-button" name="defaultCollatz" value="Explicit" onclick="location.href = location.toString().replace(location.search, '')"/>
                 </div>
@@ -49,35 +49,6 @@
         </div>
     </div>
     </body>
-
-
-    
-                    <!---
-                        - Mode
-                        - Colors
-                        - Width bar chart (interact-drag barchart = nicer ux?)
-                        - Depth tree
-                    -->
-                    <!-- <div class="form-group">
-                        <label for="exampleFormControlSelect2">Collatz Conjecture mode</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="collatz-mode" id="gridRadios1" value="fast" checked>
-                            <label class="form-check-label" for="gridRadios1">Fast Collatz (skip trivial even numbered steps)</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="collatz-mode" id="gridRadios2" value="normal">
-                            <label class="form-check-label" for="gridRadios2">Default Collatz</label>
-                        </div>
-                    </div> -->
-                    <!-- <div class="form-group">
-                        <label for="treedepth-slider">Tree depth</label>
-                        <input type="range" class="form-control-range" id="treedepth-slider" min="1" max="20" onmouseup="changeTreeDepth(this.value)">
-                    </div>
-                    <div class="form-group">
-                        <label for="barchartwidth-slider">Barchart width (columns)</label>
-                        <input type="range" class="form-control-range" id="barchartwidth-slider"  min="1" max="15">
-                    </div> -->
-
     <script>
         console.log(Date.now());
 
@@ -88,10 +59,6 @@
         // colorscheme size = m, max is 20.
         let m = 5;
         let colorScheme = new ModuloColorScheme(m);
-
-        // init UI positions
-        //$("#colors-slider")[0].value = m;
-        // $("#treedepth-slider")[0].value = maxTreeDepthRelative;
 
         let conjecture = new URLSearchParams(window.location.search).has("fast")
             ? new CollatzConjectureFast()
@@ -120,16 +87,23 @@
                 .attr("fill", d => (d.data.value() === currentRoot.value())? colorScheme.forRoot() : colorScheme.forNumber(d.data.value()));
 
             highlight();
-            // d3.select("#barchart").selectAll("rect")
-            //     .attr("fill", (innernode.value() === currentRoot.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
             showBreadcrumbs();
-            //showLegend();
             barChart(currentRoot);
             showStem(currentRoot);
         }
 
         function changeTreeDepth(newTreeDepth) {
             redraw(currentRoot, barChart_numHorizontalElements, newTreeDepth)
+        }
+        
+        var resizeId;
+        $(window).resize(function() {
+            clearTimeout(resizeId);
+            resizeId = setTimeout(doneResizing, 500);
+        });
+
+        function doneResizing(){
+            redraw(currentRoot, barChart_numHorizontalElements, maxTreeDepthRelative)
         }
 
         // TODO: add conjecture input
@@ -169,8 +143,6 @@
         }
 
         function makeRadialTree(collatzNode) {
-                        // const height = window.innerHeight*5/6;
-            // const width = window.innerWidth/2 - 50;
             var svg = d3.select("#radial_tree");
             const width = parseInt(svg.style("width"));
             const height = width;
@@ -229,9 +201,7 @@
             node.append("circle")
                 .attr("fill", d => (d === root)? colorScheme.forRoot() : colorScheme.forNumber(d.data.value()))
                 .attr("r", 7)
-                .attr("id", d => "circle" + d.data.value())
-                // .attr("data-value", d => d.data.value())
-                // .attr("data-root", root.data.value());
+                .attr("id", d => "circle" + d.data.value());
 
             function isEven(n) {
                 return !(n & 1);
