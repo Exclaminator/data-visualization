@@ -61,6 +61,7 @@ function barChart(root) {
                 .attr("height", squareHeight)
                 .attr("title", innernode.value())
                 .attr("class", "bar"+innernode.value() + " cBar"+node.value())
+                .attr("cursor", "pointer")
                 .on("mouseover", ((innernode, node) => () => { highlight(node, innernode); drawbox(node.value() - root.value(), node.value()) })(innernode, node))
                 .on("click", (innernode => () => updateRoot(innernode))(innernode))
                 .attr("fill", (innernode.value() === root.value()) ? colorScheme.forRoot() : colorScheme.forNumber(innernode.value()));
